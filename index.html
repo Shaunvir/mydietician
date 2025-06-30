@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyDietician - Connect with Registered Dietitians</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            line-height: 1.6;
+            color: #1a1a1a;
+            background-color: #ffffff;
+            font-weight: 400;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* Header */
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1a1a1a;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 16px;
+        }
+
+        .nav-contact {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .phone-link {
+            color: #16a34a;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 14px;
+            padding: 8px 16px;
+            border: 1px solid rgba(22, 163, 74, 0.2);
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .phone-link:hover {
+            background: rgba(22, 163, 74, 0.05);
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, rgba(22, 163, 74, 0.9) 0%, rgba(21, 128, 61, 0.9) 100%), 
+                        url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800"><defs><pattern id="vegetables" width="200" height="200" patternUnits="userSpaceOnUse"><rect width="200" height="200" fill="%2316a34a"/><g fill="white" opacity="0.1"><circle cx="50" cy="50" r="8"/><path d="M100,40 Q110,30 120,40 Q130,50 120,60 Q110,70 100,60 Q90,50 100,40" fill="%2322c55e"/><circle cx="150" cy="80" r="6"/><path d="M30,120 L50,100 L70,120 L50,140 Z" fill="%2334d399"/><circle cx="120" cy="120" r="10"/><path d="M170,120 Q180,110 190,120 Q180,130 170,120"/><circle cx="60" cy="170" r="7"/><path d="M130,160 L140,150 L150,160 L140,170 Z" fill="%2322c55e"/></g></pattern></defs><rect width="1200" height="800" fill="url(%23vegetables)"/></svg>');
+            background-size: cover;
+            background-position: center;
+            padding: 120px 0 80px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400"><g fill="white" opacity="0.05"><circle cx="50" cy="50" r="20"/><path d="M100,30 Q120,10 140,30 Q160,50 140,70 Q120,90 100,70 Q80,50 100,30" fill="white"/><circle cx="200" cy="80" r="15"/><path d="M280,60 L320,40 L360,60 L320,80 Z"/><circle cx="50" cy="150" r="18"/><path d="M150,120 Q170,100 190,120 Q170,140 150,120"/><circle cx="300" cy="180" r="22"/><path d="M80,250 L100,230 L120,250 L100,270 Z"/><circle cx="250" cy="280" r="16"/><path d="M350,250 Q370,230 390,250 Q370,270 350,250"/></g></svg>');
+            opacity: 0.3;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: 700px;
+        }
+
+        .hero h1 {
+            font-size: clamp(40px, 5vw, 64px);
+            font-weight: 700;
+            line-height: 1.1;
+            margin-bottom: 24px;
+            letter-spacing: -0.02em;
+        }
+
+        .hero-subtitle {
+            font-size: 20px;
+            font-weight: 400;
+            margin-bottom: 32px;
+            opacity: 0.9;
+            line-height: 1.5;
+        }
+
+        .coverage-pill {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            padding: 12px 24px;
+            border-radius: 50px;
+            display: inline-block;
+            margin-bottom: 40px;
+            font-size: 14px;
+            font-weight: 500;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .cta-primary {
+            background: #ffffff;
+            color: #16a34a;
+            padding: 16px 32px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        .cta-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        }
+
+        .cta-secondary {
+            background: transparent;
+            color: white;
+            padding: 16px 32px;
+            font-size: 16px;
+            font-weight: 500;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 12px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+            margin-left: 16px;
+        }
+
+        .cta-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Benefits Section */
+        .benefits {
+            padding: 80px 0;
+            background: #fafbfc;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 64px;
+        }
+
+        .section-title {
+            font-size: clamp(28px, 4vw, 48px);
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: #1a1a1a;
+            letter-spacing: -0.02em;
+        }
+
+        .section-subtitle {
+            font-size: 18px;
+            color: #6b7280;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .benefits-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 32px;
+        }
+
+        .benefit-card {
+            background: white;
+            padding: 32px;
+            border-radius: 16px;
+            border: 1px solid rgba(0, 0, 0, 0.06);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .benefit-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .benefit-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .benefit-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .benefit-icon {
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-bottom: 24px;
+        }
+
+        .benefit-card h3 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #1a1a1a;
+        }
+
+        .benefit-card p {
+            color: #6b7280;
+            line-height: 1.6;
+        }
+
+        /* How It Works */
+        .how-it-works {
+            padding: 80px 0;
+            background: white;
+        }
+
+        .steps-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .step {
+            display: flex;
+            align-items: flex-start;
+            gap: 24px;
+            margin-bottom: 48px;
+            position: relative;
+        }
+
+        .step:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            left: 23px;
+            top: 60px;
+            width: 2px;
+            height: 60px;
+            background: linear-gradient(to bottom, #e5e7eb, transparent);
+        }
+
+        .step-number {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+            color: white;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .step-content h3 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #1a1a1a;
+        }
+
+        .step-content p {
+            color: #6b7280;
+            line-height: 1.6;
+        }
+
+        /* Assessment Form */
+        .assessment {
+            padding: 80px 0;
+            background: #fafbfc;
+        }
+
+        .form-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 48px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(0, 0, 0, 0.06);
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #1a1a1a;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.2s ease;
+            background: white;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #16a34a;
+            box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1);
+        }
+
+        .checkbox-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 12px;
+            margin-top: 8px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px;
+            border-radius: 6px;
+            transition: background 0.2s ease;
+        }
+
+        .checkbox-item:hover {
+            background: #f9fafb;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            margin: 0;
+            accent-color: #16a34a;
+        }
+
+        .checkbox-item label {
+            margin: 0;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        /* Trust Section */
+        .trust {
+            padding: 80px 0;
+            background: white;
+            text-align: center;
+        }
+
+        .trust-badges {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 32px;
+            margin: 48px 0;
+            flex-wrap: wrap;
+        }
+
+        .trust-badge {
+            background: #f9fafb;
+            padding: 16px 24px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #374151;
+            border: 1px solid #e5e7eb;
+        }
+
+        /* Testimonials */
+        .testimonials {
+            padding: 80px 0;
+            background: #fafbfc;
+        }
+
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 32px;
+            margin-top: 64px;
+        }
+
+        .testimonial {
+            background: white;
+            padding: 32px;
+            border-radius: 16px;
+            border: 1px solid rgba(0, 0, 0, 0.06);
+            position: relative;
+        }
+
+        .testimonial-text {
+            font-size: 16px;
+            line-height: 1.7;
+            margin-bottom: 24px;
+            color: #374151;
+        }
+
+        .testimonial-author {
+            font-weight: 600;
+            color: #1a1a1a;
+            font-size: 14px;
+        }
+
+        .testimonial-location {
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        /* Footer */
+        .footer {
+            background: #1a1a1a;
+            color: white;
+            padding: 64px 0 32px;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 48px;
+            margin-bottom: 48px;
+        }
+
+        .footer-section h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: white;
+        }
+
+        .footer-section a {
+            color: #9ca3af;
+            text-decoration: none;
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            transition: color 0.2s ease;
+        }
+
+        .footer-section a:hover {
+            color: #16a34a;
+        }
+
+        .footer-bottom {
+            border-top: 1px solid #374151;
+            padding-top: 32px;
+            text-align: center;
+        }
+
+        .footer-bottom p {
+            color: #9ca3af;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        /* Success Message */
+        .success-message {
+            display: none;
+            background: #ecfdf5;
+            color: #065f46;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            border: 1px solid #a7f3d0;
+            font-weight: 500;
+        }
+
+        .error {
+            color: #dc2626;
+            font-size: 14px;
+            margin-top: 4px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 20px;
+            }
+
+            .nav {
+                padding: 16px 0;
+            }
+
+            .hero {
+                padding: 100px 0 60px;
+            }
+
+            .benefits,
+            .how-it-works,
+            .assessment,
+            .trust,
+            .testimonials {
+                padding: 60px 0;
+            }
+
+            .form-container {
+                padding: 32px 24px;
+            }
+
+            .cta-secondary {
+                margin-left: 0;
+                margin-top: 16px;
+            }
+
+            .step {
+                margin-bottom: 32px;
+            }
+
+            .checkbox-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .trust-badges {
+                flex-direction: column;
+                gap: 16px;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-in {
+            animation: fadeInUp 0.6s ease forwards;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <nav class="nav">
+                <a href="#" class="logo">
+                    <div class="logo-icon">🥗</div>
+                    MyDietician
+                </a>
+                <div class="nav-contact">
+                    <a href="tel:1-800-MY-DIET" class="phone-link">1-800-MY-DIET</a>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <div class="coverage-pill">
+                    🌱 60-70% of Canadians with employer benefits have dietitian coverage
+                </div>
+                <h1>Connect with Canadian Registered Dietitians</h1>
+                <p class="hero-subtitle">Personalized nutrition care that fits your life and your budget. Covered by your benefits.</p>
+                <div style="margin-top: 32px;">
+                    <a href="#assessment" class="cta-primary">
+                        Start Your Journey
+                        <span>→</span>
+                    </a>
+                    <a href="#benefits" class="cta-secondary">
+                        Check Coverage
+                        <span>↓</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Benefits Section -->
+    <section class="benefits" id="benefits">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Why Choose MyDietician?</h2>
+                <p class="section-subtitle">We work with major Canadian insurers including Canada Life, Sunlife, Manulife, and more</p>
+            </div>
+            
+            <div class="benefits-grid">
+                <div class="benefit-card">
+                    <div class="benefit-icon">💰</div>
+                    <h3>Most Pay $0 Out-of-Pocket</h3>
+                    <p>With employer benefits, most clients pay nothing for their dietitian consultations</p>
+                </div>
+                <div class="benefit-card">
+                    <div class="benefit-icon">📱</div>
+                    <h3>Flexible Virtual Care</h3>
+                    <p>Video calls, phone, or in-person options that fit your schedule</p>
+                </div>
+                <div class="benefit-card">
+                    <div class="benefit-icon">🚀</div>
+                    <h3>No Referral Needed</h3>
+                    <p>Book directly with registered healthcare professionals</p>
+                </div>
+                <div class="benefit-card">
+                    <div class="benefit-icon">🎓</div>
+                    <h3>Regulated Professionals</h3>
+                    <p>All dietitians registered with provincial regulatory bodies</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section class="how-it-works">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">How It Works</h2>
+                <p class="section-subtitle">Get started in just 4 simple steps</p>
+            </div>
+            
+            <div class="steps-container">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h3>Complete 2-Minute Assessment</h3>
+                        <p>Tell us about your health goals and insurance coverage</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h3>We Verify Your Benefits</h3>
+                        <p>Our team confirms your dietitian coverage with your insurer</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h3>Get Matched</h3>
+                        <p>We connect you with a local registered dietitian</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <h3>Schedule Consultation</h3>
+                        <p>Book your first virtual appointment at your convenience</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Assessment Form -->
+    <section class="assessment" id="assessment">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Get Started Today</h2>
+                <p class="section-subtitle">Complete this quick assessment to connect with a registered dietitian</p>
+            </div>
+            
+            <div class="form-container">
+                <div class="success-message" id="successMessage">
+                    ✅ Thank you! Your assessment has been submitted. We'll contact you within 24 hours to verify your benefits and match you with a dietitian.
+                </div>
+                
+                <form id="assessmentForm">
+                    <div class="form-group">
+                        <label for="name">Full Name *</label>
+                        <input type="text" id="name" name="name" required>
+                        <div class="error" id="nameError"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email">Email Address *</label>
+                        <input type="email" id="email" name="email" required>
+                        <div class="error" id="emailError"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="province">Province of Residence *</label>
+                        <select id="province" name="province" required>
+                            <option value="">Select your province</option>
+                            <option value="AB">Alberta</option>
+                            <option value="BC">British Columbia</option>
+                            <option value="MB">Manitoba</option>
+                            <option value="NB">New Brunswick</option>
+                            <option value="NL">Newfoundland and Labrador</option>
+                            <option value="NS">Nova Scotia</option>
+                            <option value="ON">Ontario</option>
+                            <option value="PE">Prince Edward Island</option>
+                            <option value="QC">Quebec</option>
+                            <option value="SK">Saskatchewan</option>
+                            <option value="NT">Northwest Territories</option>
+                            <option value="NU">Nunavut</option>
+                            <option value="YT">Yukon</option>
+                        </select>
+                        <div class="error" id="provinceError"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="benefits">Do you have employer health benefits? *</label>
+                        <select id="benefits" name="benefits" required>
+                            <option value="">Please select</option>
+                            <option value="yes">Yes</option>
+                            <option value="no">No</option>
+                            <option value="unsure">Unsure</option>
+                        </select>
+                        <div class="error" id="benefitsError"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="insurer">Insurance Provider (if known)</label>
+                        <select id="insurer" name="insurer">
+                            <option value="">Select your insurer</option>
+                            <option value="canada-life">Canada Life</option>
+                            <option value="sunlife">Sun Life Financial</option>
+                            <option value="manulife">Manulife</option>
+                            <option value="great-west">Great-West Life</option>
+                            <option value="blue-cross">Blue Cross</option>
+                            <option value="chambers">Chambers of Commerce Group Insurance</option>
+                            <option value="desjardins">Desjardins Insurance</option>
+                            <option value="industrial-alliance">Industrial Alliance</option>
+                            <option value="other">Other</option>
+                            <option value="unknown">Don't know</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Primary Health Goals * (Select all that apply)</label>
+                        <div class="checkbox-grid">
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="weight" name="goals" value="weight-management">
+                                <label for="weight">Weight Management</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="diabetes" name="goals" value="diabetes">
+                                <label for="diabetes">Diabetes Management</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="heart" name="goals" value="heart-health">
+                                <label for="heart">Heart Health</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="gut" name="goals" value="gut-health">
+                                <label for="gut">Gut Health</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="wellness" name="goals" value="general-wellness">
+                                <label for="wellness">General Wellness</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="sports" name="goals" value="sports-nutrition">
+                                <label for="sports">Sports Nutrition</label>
+                            </div>
+                        </div>
+                        <div class="error" id="goalsError"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="consultation-type">Preferred Consultation Type *</label>
+                        <select id="consultation-type" name="consultationType" required>
+                            <option value="">Select preference</option>
+                            <option value="video">Video Call</option>
+                            <option value="phone">Phone Call</option>
+                            <option value="in-person">In-Person (if available)</option>
+                            <option value="flexible">Flexible - any option</option>
+                        </select>
+                        <div class="error" id="consultationTypeError"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="description">Brief description of what you're looking for</label>
+                        <textarea id="description" name="description" rows="4" placeholder="Tell us about your nutrition goals, any specific concerns, or what you hope to achieve..."></textarea>
+                    </div>
+                    
+                    <button type="submit" class="cta-primary" style="width: 100%; justify-content: center;">
+                        Get Matched with a Dietitian
+                        <span>→</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Trust Indicators -->
+    <section class="trust">
+        <div class="container">
+            <h2 class="section-title">Trusted by Canadians</h2>
+            <div class="trust-badges">
+                <div class="trust-badge">College of Dietitians of Ontario</div>
+                <div class="trust-badge">Dietitians of Canada</div>
+                <div class="trust-badge">PIPEDA Compliant</div>
+                <div class="trust-badge">Provincial Regulatory Bodies</div>
+            </div>
+            <p style="color: #6b7280;">Compliant with Canadian healthcare privacy laws and provincial regulations</p>
+        </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="testimonials">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">What Our Clients Say</h2>
+            </div>
+            
+            <div class="testimonials-grid">
+                <div class="testimonial">
+                    <p class="testimonial-text">"My employer benefits covered the entire cost. Sarah helped me manage my diabetes through simple meal planning changes. The virtual appointments fit perfectly around my work schedule."</p>
+                    <div class="testimonial-author">Michael T.</div>
+                    <div class="testimonial-location">Toronto, ON</div>
+                </div>
+                <div class="testimonial">
+                    <p class="testimonial-text">"I was skeptical about virtual consultations, but my dietitian was incredible. We developed a plan for my heart health that actually works with my busy family life. Zero out-of-pocket costs!"</p>
+                    <div class="testimonial-author">Jennifer L.</div>
+                    <div class="testimonial-location">Vancouver, BC</div>
+                </div>
+                <div class="testimonial">
+                    <p class="testimonial-text">"The benefits verification process was seamless. Within 48 hours I was connected with a French-speaking dietitian in Quebec. The personalized nutrition plan has been life-changing."</p>
+                    <div class="testimonial-author">Marie D.</div>
+                    <div class="testimonial-location">Montreal, QC</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
