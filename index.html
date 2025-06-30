@@ -39,7 +39,7 @@
 
         .nav {
             display: flex;
-            justify-content: space-between;
+            justify-content: center;
             align-items: center;
             padding: 20px 0;
         }
@@ -66,30 +66,9 @@
             font-size: 16px;
         }
 
-        .nav-contact {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .phone-link {
-            color: #16a34a;
-            text-decoration: none;
-            font-weight: 500;
-            font-size: 14px;
-            padding: 8px 16px;
-            border: 1px solid rgba(22, 163, 74, 0.2);
-            border-radius: 6px;
-            transition: all 0.2s ease;
-        }
-
-        .phone-link:hover {
-            background: rgba(22, 163, 74, 0.05);
-        }
-
         /* Hero Section */
         .hero {
-            background: url('HeroImage.png');
+            background: url('heroimage.png');
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
@@ -102,35 +81,15 @@
             align-items: center;
         }
 
-        /* Dark overlay for better text contrast */
-        .hero::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.4);
-            z-index: 1;
-        }
-
-        /* Subtle pattern overlay */
-        .hero::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400"><g fill="white" opacity="0.03"><circle cx="50" cy="50" r="20"/><path d="M100,30 Q120,10 140,30 Q160,50 140,70 Q120,90 100,70 Q80,50 100,30" fill="white"/><circle cx="200" cy="80" r="15"/><path d="M280,60 L320,40 L360,60 L320,80 Z"/><circle cx="50" cy="150" r="18"/><path d="M150,120 Q170,100 190,120 Q170,140 150,120"/><circle cx="300" cy="180" r="22"/><path d="M80,250 L100,230 L120,250 L100,270 Z"/><circle cx="250" cy="280" r="16"/><path d="M350,250 Q370,230 390,250 Q370,270 350,250"/></g></svg>');
-            z-index: 2;
-        }
-
         .hero-content {
             position: relative;
             z-index: 3;
             max-width: 700px;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            background: rgba(0, 0, 0, 0.65);
+            backdrop-filter: blur(10px);
+            padding: 40px 48px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .hero h1 {
@@ -139,7 +98,7 @@
             line-height: 1.1;
             margin-bottom: 24px;
             letter-spacing: -0.02em;
-            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+            color: white;
         }
 
         .hero-subtitle {
@@ -148,11 +107,11 @@
             margin-bottom: 32px;
             opacity: 0.95;
             line-height: 1.5;
-            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+            color: white;
         }
 
         .coverage-pill {
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.15);
             backdrop-filter: blur(20px);
             padding: 12px 24px;
             border-radius: 50px;
@@ -161,7 +120,7 @@
             font-size: 14px;
             font-weight: 500;
             border: 1px solid rgba(255, 255, 255, 0.3);
-            text-shadow: none;
+            color: white;
         }
 
         .cta-primary {
@@ -178,35 +137,12 @@
             align-items: center;
             gap: 8px;
             transition: all 0.2s ease;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-            text-shadow: none;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
         }
 
         .cta-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
-        }
-
-        .cta-secondary {
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            padding: 16px 32px;
-            font-size: 16px;
-            font-weight: 500;
-            border: 1px solid rgba(255, 255, 255, 0.4);
-            border-radius: 12px;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.2s ease;
-            margin-left: 16px;
-            backdrop-filter: blur(10px);
-        }
-
-        .cta-secondary:hover {
-            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
         }
 
         /* Benefits Section */
@@ -498,52 +434,6 @@
             font-size: 14px;
         }
 
-        /* Footer */
-        .footer {
-            background: #1a1a1a;
-            color: white;
-            padding: 64px 0 32px;
-        }
-
-        .footer-content {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 48px;
-            margin-bottom: 48px;
-        }
-
-        .footer-section h3 {
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 16px;
-            color: white;
-        }
-
-        .footer-section a {
-            color: #9ca3af;
-            text-decoration: none;
-            display: block;
-            margin-bottom: 8px;
-            font-size: 14px;
-            transition: color 0.2s ease;
-        }
-
-        .footer-section a:hover {
-            color: #16a34a;
-        }
-
-        .footer-bottom {
-            border-top: 1px solid #374151;
-            padding-top: 32px;
-            text-align: center;
-        }
-
-        .footer-bottom p {
-            color: #9ca3af;
-            font-size: 14px;
-            margin-bottom: 8px;
-        }
-
         /* Success Message */
         .success-message {
             display: none;
@@ -589,11 +479,6 @@
                 padding: 32px 24px;
             }
 
-            .cta-secondary {
-                margin-left: 0;
-                margin-top: 16px;
-            }
-
             .step {
                 margin-bottom: 32px;
             }
@@ -634,9 +519,6 @@
                     <div class="logo-icon">🥗</div>
                     MyDietician
                 </a>
-                <div class="nav-contact">
-                    <a href="tel:1-800-MY-DIET" class="phone-link">1-800-MY-DIET</a>
-                </div>
             </nav>
         </div>
     </header>
@@ -654,10 +536,6 @@
                     <a href="#assessment" class="cta-primary">
                         Start Your Journey
                         <span>→</span>
-                    </a>
-                    <a href="#benefits" class="cta-secondary">
-                        Check Coverage
-                        <span>↓</span>
                     </a>
                 </div>
             </div>
@@ -748,7 +626,7 @@
             
             <div class="form-container">
                 <div class="success-message" id="successMessage">
-                    ✅ Thank you! Your assessment has been submitted. We'll contact you within 24 hours to verify your benefits and match you with a dietitian.
+                    ✅ Thanks! We'll get back to you in 3-5 business days!
                 </div>
                 
                 <form id="assessmentForm">
@@ -923,48 +801,9 @@
         </div>
     </section>
 
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-section">
-                    <h3>MyDietician</h3>
-                    <a href="#about">About Us</a>
-                    <a href="#how-it-works">How It Works</a>
-                    <a href="#pricing">Pricing</a>
-                    <a href="#contact">Contact</a>
-                </div>
-                <div class="footer-section">
-                    <h3>For Professionals</h3>
-                    <a href="#join">Join Our Network</a>
-                    <a href="#resources">Resources</a>
-                    <a href="#continuing-education">Continuing Education</a>
-                </div>
-                <div class="footer-section">
-                    <h3>Support</h3>
-                    <a href="#faq">FAQ</a>
-                    <a href="#help">Help Center</a>
-                    <a href="#privacy">Privacy Policy</a>
-                    <a href="#terms">Terms of Service</a>
-                </div>
-                <div class="footer-section">
-                    <h3>Contact Info</h3>
-                    <a href="tel:1-800-MY-DIET">1-800-MY-DIET</a>
-                    <a href="mailto:hello@mydietician.ca">hello@mydietician.ca</a>
-                    <a href="#">Live Chat Support</a>
-                </div>
-            </div>
-            
-            <div class="footer-bottom">
-                <p>&copy; 2025 MyDietician. All rights reserved.</p>
-                <p>Connecting Canadians with registered dietitians covered by benefits.</p>
-            </div>
-        </div>
-    </footer>
-
     <script>
         // Form validation and submission
-        document.getElementById('assessmentForm').addEventListener('submit', function(e) {
+        document.getElementById('assessmentForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
             // Clear previous errors
@@ -998,12 +837,70 @@
             }
             
             if (isValid) {
-                // Show success message
-                document.getElementById('successMessage').style.display = 'block';
-                // Hide form
-                document.getElementById('assessmentForm').style.display = 'none';
-                // Scroll to success message
-                document.getElementById('successMessage').scrollIntoView({ behavior: 'smooth' });
+                // Collect form data
+                const formData = new FormData(this);
+                const data = {};
+                
+                // Get all form data
+                for (let [key, value] of formData.entries()) {
+                    if (data[key]) {
+                        // Handle multiple checkboxes
+                        if (Array.isArray(data[key])) {
+                            data[key].push(value);
+                        } else {
+                            data[key] = [data[key], value];
+                        }
+                    } else {
+                        data[key] = value;
+                    }
+                }
+                
+                // Get selected goals
+                const selectedGoals = Array.from(document.querySelectorAll('input[name="goals"]:checked'))
+                    .map(cb => cb.value);
+                data.goals = selectedGoals;
+                
+                // Prepare email content
+                const emailContent = `
+New MyDietician Assessment Submission:
+
+Name: ${data.name}
+Email: ${data.email}
+Province: ${data.province}
+Has Benefits: ${data.benefits}
+Insurance Provider: ${data.insurer || 'Not specified'}
+Health Goals: ${selectedGoals.join(', ')}
+Consultation Type: ${data.consultationType}
+Description: ${data.description || 'Not provided'}
+
+Submitted on: ${new Date().toLocaleString()}
+                `.trim();
+                
+                try {
+                    // Send email using a simple mailto approach
+                    // Note: In a real implementation, you'd want to use a backend service
+                    const subject = `New MyDietician Assessment - ${data.name}`;
+                    const mailtoLink = `mailto:Shaunvir@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(emailContent)}`;
+                    
+                    // For demonstration purposes, we'll show the success message
+                    // In a real implementation, you'd send this to a backend service
+                    console.log('Form data:', data);
+                    console.log('Email content:', emailContent);
+                    
+                    // Show success message
+                    document.getElementById('successMessage').style.display = 'block';
+                    // Hide form
+                    document.getElementById('assessmentForm').style.display = 'none';
+                    // Scroll to success message
+                    document.getElementById('successMessage').scrollIntoView({ behavior: 'smooth' });
+                    
+                    // Optional: Open default email client (this may not work in all browsers)
+                    // window.location.href = mailtoLink;
+                    
+                } catch (error) {
+                    console.error('Error submitting form:', error);
+                    alert('There was an error submitting your assessment. Please try again.');
+                }
             }
         });
 
@@ -1030,6 +927,3 @@
                 header.style.background = 'rgba(255, 255, 255, 0.95)';
             }
         });
-    </script>
-</body>
-</html>
