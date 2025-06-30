@@ -618,143 +618,148 @@
 
     <!-- Assessment Form -->
     <section class="assessment" id="assessment">
-        <div class="container">
-            <div class="section-header">
-                <h2 class="section-title">Get Started Today</h2>
-                <p class="section-subtitle">Complete this quick assessment to connect with a registered dietitian</p>
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">Get Started Today</h2>
+            <p class="section-subtitle">Complete this quick assessment to connect with a registered dietitian</p>
+        </div>
+        
+        <div class="form-container">
+            <div class="success-message" id="successMessage">
+                ✅ Thanks! We'll get back to you in 3-5 business days!
             </div>
             
-            <div class="form-container">
-                <div class="success-message" id="successMessage">
-                    ✅ Thanks! We'll get back to you in 3-5 business days!
+            <form id="assessmentForm" action="https://formspree.io/f/xnnvwzba" method="POST">
+                <!-- Formspree configuration -->
+                <input type="hidden" name="_subject" value="New MyDietician Assessment Submission">
+                <input type="hidden" name="_next" value="https://mydietician.ca/#success">
+                <input type="hidden" name="_template" value="table">
+                
+                <div class="form-group">
+                    <label for="name">Full Name *</label>
+                    <input type="text" id="name" name="name" required>
+                    <div class="error" id="nameError"></div>
                 </div>
                 
-                <form id="assessmentForm">
-                    <div class="form-group">
-                        <label for="name">Full Name *</label>
-                        <input type="text" id="name" name="name" required>
-                        <div class="error" id="nameError"></div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="email">Email Address *</label>
-                        <input type="email" id="email" name="email" required>
-                        <div class="error" id="emailError"></div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="province">Province of Residence *</label>
-                        <select id="province" name="province" required>
-                            <option value="">Select your province</option>
-                            <option value="AB">Alberta</option>
-                            <option value="BC">British Columbia</option>
-                            <option value="MB">Manitoba</option>
-                            <option value="NB">New Brunswick</option>
-                            <option value="NL">Newfoundland and Labrador</option>
-                            <option value="NS">Nova Scotia</option>
-                            <option value="ON">Ontario</option>
-                            <option value="PE">Prince Edward Island</option>
-                            <option value="QC">Quebec</option>
-                            <option value="SK">Saskatchewan</option>
-                            <option value="NT">Northwest Territories</option>
-                            <option value="NU">Nunavut</option>
-                            <option value="YT">Yukon</option>
-                        </select>
-                        <div class="error" id="provinceError"></div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="benefits">Do you have employer health benefits? *</label>
-                        <select id="benefits" name="benefits" required>
-                            <option value="">Please select</option>
-                            <option value="yes">Yes</option>
-                            <option value="no">No</option>
-                            <option value="unsure">Unsure</option>
-                        </select>
-                        <div class="error" id="benefitsError"></div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="insurer">Insurance Provider (if known)</label>
-                        <select id="insurer" name="insurer">
-                            <option value="">Select your insurer</option>
-                            <option value="canada-life">Canada Life</option>
-                            <option value="sunlife">Sun Life Financial</option>
-                            <option value="manulife">Manulife</option>
-                            <option value="great-west">Great-West Life</option>
-                            <option value="blue-cross">Blue Cross</option>
-                            <option value="chambers">Chambers of Commerce Group Insurance</option>
-                            <option value="desjardins">Desjardins Insurance</option>
-                            <option value="industrial-alliance">Industrial Alliance</option>
-                            <option value="other">Other</option>
-                            <option value="unknown">Don't know</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Primary Health Goals * (Select all that apply)</label>
-                        <div class="checkbox-grid">
-                            <div class="checkbox-item">
-                                <input type="checkbox" id="injury" name="goals" value="injury-recovery">
-                                <label for="injury">Injury Recovery</label>
-                            </div>
-                            <div class="checkbox-item">
-                                <input type="checkbox" id="weight" name="goals" value="weight-management">
-                                <label for="weight">Weight Management</label>
-                            </div>
-                            <div class="checkbox-item">
-                                <input type="checkbox" id="diabetes" name="goals" value="diabetes">
-                                <label for="diabetes">Diabetes Management</label>
-                            </div>
-                            <div class="checkbox-item">
-                                <input type="checkbox" id="heart" name="goals" value="heart-health">
-                                <label for="heart">Heart Health</label>
-                            </div>
-                            <div class="checkbox-item">
-                                <input type="checkbox" id="gut" name="goals" value="gut-health">
-                                <label for="gut">Gut Health</label>
-                            </div>
-                            <div class="checkbox-item">
-                                <input type="checkbox" id="wellness" name="goals" value="general-wellness">
-                                <label for="wellness">General Wellness</label>
-                            </div>
-                            <div class="checkbox-item">
-                                <input type="checkbox" id="sports" name="goals" value="sports-nutrition">
-                                <label for="sports">Sports Nutrition</label>
-                            </div>
-                            <div class="checkbox-item">
-                                <input type="checkbox" id="oral" name="goals" value="oral-health">
-                                <label for="oral">Oral Health</label>
-                            </div>
+                <div class="form-group">
+                    <label for="email">Email Address *</label>
+                    <input type="email" id="email" name="email" required>
+                    <div class="error" id="emailError"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="province">Province of Residence *</label>
+                    <select id="province" name="province" required>
+                        <option value="">Select your province</option>
+                        <option value="Alberta">Alberta</option>
+                        <option value="British Columbia">British Columbia</option>
+                        <option value="Manitoba">Manitoba</option>
+                        <option value="New Brunswick">New Brunswick</option>
+                        <option value="Newfoundland and Labrador">Newfoundland and Labrador</option>
+                        <option value="Nova Scotia">Nova Scotia</option>
+                        <option value="Ontario">Ontario</option>
+                        <option value="Prince Edward Island">Prince Edward Island</option>
+                        <option value="Quebec">Quebec</option>
+                        <option value="Saskatchewan">Saskatchewan</option>
+                        <option value="Northwest Territories">Northwest Territories</option>
+                        <option value="Nunavut">Nunavut</option>
+                        <option value="Yukon">Yukon</option>
+                    </select>
+                    <div class="error" id="provinceError"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="benefits">Do you have employer health benefits? *</label>
+                    <select id="benefits" name="benefits" required>
+                        <option value="">Please select</option>
+                        <option value="Yes">Yes</option>
+                        <option value="No">No</option>
+                        <option value="Unsure">Unsure</option>
+                    </select>
+                    <div class="error" id="benefitsError"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="insurer">Insurance Provider (if known)</label>
+                    <select id="insurer" name="insurer">
+                        <option value="">Select your insurer</option>
+                        <option value="Canada Life">Canada Life</option>
+                        <option value="Sun Life Financial">Sun Life Financial</option>
+                        <option value="Manulife">Manulife</option>
+                        <option value="Great-West Life">Great-West Life</option>
+                        <option value="Blue Cross">Blue Cross</option>
+                        <option value="Chambers of Commerce Group Insurance">Chambers of Commerce Group Insurance</option>
+                        <option value="Desjardins Insurance">Desjardins Insurance</option>
+                        <option value="Industrial Alliance">Industrial Alliance</option>
+                        <option value="Other">Other</option>
+                        <option value="Don't know">Don't know</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Primary Health Goals * (Select all that apply)</label>
+                    <div class="checkbox-grid">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="injury" name="goals" value="Injury Recovery">
+                            <label for="injury">Injury Recovery</label>
                         </div>
-                        <div class="error" id="goalsError"></div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="weight" name="goals" value="Weight Management">
+                            <label for="weight">Weight Management</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="diabetes" name="goals" value="Diabetes Management">
+                            <label for="diabetes">Diabetes Management</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="heart" name="goals" value="Heart Health">
+                            <label for="heart">Heart Health</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="gut" name="goals" value="Gut Health">
+                            <label for="gut">Gut Health</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="wellness" name="goals" value="General Wellness">
+                            <label for="wellness">General Wellness</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="sports" name="goals" value="Sports Nutrition">
+                            <label for="sports">Sports Nutrition</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="oral" name="goals" value="Oral Health">
+                            <label for="oral">Oral Health</label>
+                        </div>
                     </div>
-                    
-                    <div class="form-group">
-                        <label for="consultation-type">Preferred Consultation Type *</label>
-                        <select id="consultation-type" name="consultationType" required>
-                            <option value="">Select preference</option>
-                            <option value="video">Video Call</option>
-                            <option value="phone">Phone Call</option>
-                            <option value="in-person">In-Person (if available)</option>
-                            <option value="flexible">Flexible - any option</option>
-                        </select>
-                        <div class="error" id="consultationTypeError"></div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="description">Brief description of what you're looking for</label>
-                        <textarea id="description" name="description" rows="4" placeholder="Tell us about your nutrition goals, any specific concerns, or what you hope to achieve..."></textarea>
-                    </div>
-                    
-                    <button type="submit" class="cta-primary" style="width: 100%; justify-content: center;">
-                        Get Matched with a Dietitian
-                        <span>→</span>
-                    </button>
-                </form>
-            </div>
+                    <div class="error" id="goalsError"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="consultation-type">Preferred Consultation Type *</label>
+                    <select id="consultation-type" name="consultationType" required>
+                        <option value="">Select preference</option>
+                        <option value="Video Call">Video Call</option>
+                        <option value="Phone Call">Phone Call</option>
+                        <option value="In-Person (if available)">In-Person (if available)</option>
+                        <option value="Flexible - any option">Flexible - any option</option>
+                    </select>
+                    <div class="error" id="consultationTypeError"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="description">Brief description of what you're looking for</label>
+                    <textarea id="description" name="description" rows="4" placeholder="Tell us about your nutrition goals, any specific concerns, or what you hope to achieve..."></textarea>
+                </div>
+                
+                <button type="submit" class="cta-primary" style="width: 100%; justify-content: center;">
+                    Get Matched with a Dietitian
+                    <span>→</span>
+                </button>
+            </form>
         </div>
-    </section>
+    </div>
+</section>
 
     <!-- Trust Section -->
     <section class="trust">
