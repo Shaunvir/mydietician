@@ -1,4 +1,7 @@
-<!DOCTYPE html>
+if (response.ok) {
+                    // Success - redirect to thank you page
+                    console.log('Form submitted successfully, redirecting...');
+                    window<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -68,10 +71,7 @@
 
         /* Hero Section */
         .hero {
-            background: url('HeroImage.png');
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
+            background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
             padding: 120px 0 80px;
             color: white;
             position: relative;
@@ -446,6 +446,17 @@
             font-weight: 500;
         }
 
+        .error-message {
+            display: none;
+            background: #fef2f2;
+            color: #991b1b;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            border: 1px solid #fecaca;
+            font-weight: 500;
+        }
+
         .error {
             color: #dc2626;
             font-size: 14px;
@@ -458,6 +469,7 @@
 
         .submit-button.loading {
             pointer-events: none;
+            opacity: 0.7;
         }
 
         .submit-button.loading::after {
@@ -656,12 +668,11 @@
                     ✅ Thanks! We'll get back to you in 3-5 business days!
                 </div>
                 
-                <form id="assessmentForm" action="https://formspree.io/f/xnnvwzba" method="POST">
-                    <!-- Formspree configuration -->
-                    <input type="hidden" name="_subject" value="New MyDietitian Assessment Submission">
-                    <input type="hidden" name="_next" value="https://myDietitian.ca/thank-you.html">
-                    <input type="hidden" name="_autoresponse" value="Thanks! We received your assessment and will get back to you within 5 business days. A registered Dietitian from our team will be in touch soon to help you achieve your health goals.">
-                    
+                <div class="error-message" id="errorMessage">
+                    ❌ There was an error submitting your form. Please try again.
+                </div>
+                
+                <form id="assessmentForm" novalidate>
                     <div class="form-group">
                         <label for="name">Full Name *</label>
                         <input type="text" id="name" name="name" required>
@@ -779,9 +790,6 @@
                         <textarea id="description" name="description" rows="4" placeholder="Tell us about your nutrition goals, any specific concerns, or what you hope to achieve..."></textarea>
                     </div>
                     
-                    <!-- Add a success redirect URL that Formspree can use -->
-                    <input type="hidden" name="_captcha" value="false">
-                    
                     <button type="submit" class="cta-primary submit-button" style="width: 100%; justify-content: center;" id="submitButton">
                         Get Matched with a Dietitian
                         <span>→</span>
@@ -837,9 +845,12 @@
     </section>
 
     <script>
-        // Simplified form submission with better error handling
         document.getElementById('assessmentForm').addEventListener('submit', function(e) {
             e.preventDefault();
+            
+            // Hide any previous messages
+            document.getElementById('successMessage').style.display = 'none';
+            document.getElementById('errorMessage').style.display = 'none';
             
             // Clear previous errors
             document.querySelectorAll('.error').forEach(error => error.textContent = '');
@@ -847,11 +858,18 @@
             let isValid = true;
             
             // Validate required fields
-            const requiredFields = ['name', 'email', 'province', 'benefits', 'consultationType'];
+            const requiredFields = [
+                { id: 'name', errorId: 'nameError', message: 'This field is required' },
+                { id: 'email', errorId: 'emailError', message: 'This field is required' },
+                { id: 'province', errorId: 'provinceError', message: 'Please select your province' },
+                { id: 'benefits', errorId: 'benefitsError', message: 'Please select an option' },
+                { id: 'consultation-type', errorId: 'consultationTypeError', message: 'Please select a consultation type' }
+            ];
+            
             requiredFields.forEach(field => {
-                const input = document.getElementById(field);
+                const input = document.getElementById(field.id);
                 if (!input.value.trim()) {
-                    document.getElementById(field + 'Error').textContent = 'This field is required';
+                    document.getElementById(field.errorId).textContent = field.message;
                     isValid = false;
                 }
             });
@@ -880,14 +898,28 @@
             submitButton.classList.add('loading');
             submitButton.innerHTML = 'Submitting...';
             
-            // Create FormData and submit
-            const formData = new FormData(this);
+            // Prepare form data
+            const formData = new FormData();
             
-            // Convert checkbox values to a comma-separated string
+            // Add all form fields
+            formData.append('name', document.getElementById('name').value);
+            formData.append('email', document.getElementById('email').value);
+            formData.append('province', document.getElementById('province').value);
+            formData.append('benefits', document.getElementById('benefits').value);
+            formData.append('insurer', document.getElementById('insurer').value);
+            formData.append('consultationType', document.getElementById('consultation-type').value);
+            formData.append('description', document.getElementById('description').value);
+            
+            // Handle health goals (checkboxes)
             const selectedGoals = Array.from(document.querySelectorAll('input[name="healthGoals"]:checked'))
                 .map(cb => cb.value);
-            formData.delete('healthGoals'); // Remove individual checkbox entries
-            formData.append('healthGoals', selectedGoals.join(', ')); // Add as single field
+            formData.append('healthGoals', selectedGoals.join(', '));
+            
+            // Add Formspree configuration
+            formData.append('_subject', 'New MyDietitian Assessment Submission');
+            formData.append('_autoresponse', 'Thanks! We received your assessment and will get back to you within 5 business days. A registered Dietitian from our team will be in touch soon to help you achieve your health goals.');
+            formData.append('_captcha', 'false');
+            formData.append('_next', window.location.origin + '/thank-you.html');
             
             // Submit to Formspree
             fetch('https://formspree.io/f/xnnvwzba', {
@@ -898,24 +930,45 @@
                 }
             })
             .then(response => {
+                console.log('Response status:', response.status);
+                console.log('Response headers:', response.headers);
+                
                 if (response.ok) {
-                    // Success - redirect to thank you page
-                    window.location.href = 'thank-you.html';
+                    // Success
+                    document.getElementById('successMessage').style.display = 'block';
+                    document.getElementById('assessmentForm').style.display = 'none';
+                    
+                    // Scroll to success message
+                    document.getElementById('successMessage').scrollIntoView({ 
+                        behavior: 'smooth', 
+                        block: 'center' 
+                    });
                 } else {
+                    // Handle error response
                     return response.json().then(data => {
+                        console.error('Error response:', data);
                         throw new Error(data.errors ? data.errors.map(e => e.message).join(', ') : 'Form submission failed');
                     });
                 }
             })
             .catch(error => {
-                console.error('Error:', error);
+                console.error('Submission error:', error);
                 
+                // Show error message
+                document.getElementById('errorMessage').style.display = 'block';
+                document.getElementById('errorMessage').textContent = 
+                    '❌ There was an error submitting your form. Please try again or contact us directly at info@mydietitian.ca';
+                
+                // Scroll to error message
+                document.getElementById('errorMessage').scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'center' 
+                });
+            })
+            .finally(() => {
                 // Reset button state
                 submitButton.classList.remove('loading');
                 submitButton.innerHTML = 'Get Matched with a Dietitian <span>→</span>';
-                
-                // Show error message
-                alert('There was an error submitting your form. Please try again or contact us directly. Error: ' + error.message);
             });
         });
 
@@ -942,6 +995,20 @@
                 header.style.background = 'rgba(255, 255, 255, 0.95)';
             }
         });
+
+        // Debug function to test form data
+        function debugFormData() {
+            const form = document.getElementById('assessmentForm');
+            const formData = new FormData(form);
+            
+            console.log('Form data contents:');
+            for (let [key, value] of formData.entries()) {
+                console.log(key, value);
+            }
+        }
+
+        // Add this for debugging - you can remove it later
+        console.log('Form script loaded successfully');
     </script>
 </body>
 </html>
