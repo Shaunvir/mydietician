@@ -349,6 +349,10 @@
         }
 
     </style>
+
+    <!-- Calendly embed resources -->
+    <link href="https://assets.calendly.com/assets/external/widget.css" rel="stylesheet">
+    <script src="https://assets.calendly.com/assets/external/widget.js" type="text/javascript" async></script>
 </head>
 <body>
     <!-- Header -->
@@ -414,7 +418,7 @@
                 <button class="save-button" onclick="applyCurrentFilters()">Apply Filters</button>
 
                 <div class="results-count">
-                    <span id="resultsCount">4</span> dietitians / nutritionists in <span id="currentLocation">Canada</span>
+                    <span id="resultsCount">2</span> dietitians / nutritionists in <span id="currentLocation">Canada</span>
                 </div>
             </div>
         </div>
@@ -455,92 +459,6 @@
             <!-- Results Area -->
             <main class="results-area">
                 <!-- Dietitian 1 -->
-                <div class="dietitian-card" data-location="Montreal" data-insurance="Canada Life,Sun Life Financial,Manulife,Great-West Life,Blue Cross,Chambers of Commerce Group Insurance,Desjardins Insurance,Industrial Alliance,Medavie Blue Cross,GroupHEALTH" data-specialties="Weight Management,Diabetes Management,Heart Health,Sports Nutrition,PCOS Management,Autoimmune Conditions,Food Allergies & Sensitivities,Gut Health,General Nutrition,Pregnancy & Postpartum,High Blood Pressure,High Cholesterol,Kidney Disease,Vegan & Vegetarian,Eating Disorders,Pediatric Nutrition,Cancer Nutrition,Menopause,Transplant Nutrition,Oral Health" data-modalities="Video calls,In-person">
-                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Crect width='120' height='120' rx='60' fill='%23f3e8ff'/%3E%3Ctext x='60' y='75' text-anchor='middle' font-size='48' fill='%236b46c1'%3E👩‍⚕️%3C/text%3E%3C/svg%3E" alt="Dr. Sarah Chen" class="dietitian-avatar">
-                    
-                    <div class="dietitian-info">
-                        <h2 class="dietitian-name">Dr. Sarah Chen, RD, FICTIONAL</h2>
-                        
-                        <div class="dietitian-credentials">
-                            <div class="credential-badge">
-                                📹 Video calls
-                            </div>
-                            <div class="credential-badge">
-                                👥 In-person
-                            </div>
-                            <div class="insurance-badge">
-                                ✓ Accepts All Major Insurance
-                            </div>
-                        </div>
-
-                        <div class="specialties">
-                            <div class="specialties-label">Specialties:</div>
-                            <div class="specialties-list">
-                                Weight Management, Diabetes Management, Heart Health, Sports Nutrition, PCOS Management, Autoimmune Conditions, Food Allergies & Sensitivities, Gut Health, General Nutrition, Pregnancy & Postpartum, High Blood Pressure, High Cholesterol, Kidney Disease, Vegan & Vegetarian, Eating Disorders, Pediatric Nutrition, Cancer Nutrition, Menopause, Transplant Nutrition, Oral Health
-                            </div>
-                        </div>
-
-                        <p class="dietitian-description">
-                            As a dietitian, I offer my clients a blend of scientific research, practical guidance, and help shape dietary choices for optimal wellbeing. My ideal clients are those seeking to enhance their health without the rigidity of conventional diets. I stand out by blending creativity, patience, and...
-                        </p>
-
-                        <div class="availability">
-                            <div class="availability-slot">August 1<br>3 appt</div>
-                            <div class="availability-slot">August 5<br>5 appt</div>
-                            <div class="availability-slot">August 6<br>4 appt</div>
-                        </div>
-
-                        <div class="dietitian-actions">
-                            <button class="btn-primary" onclick="bookAppointment('Sarah Chen')">Book now</button>
-                            <button class="btn-secondary" onclick="viewProfile('Sarah Chen')">View profile</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Dietitian 2 -->
-                <div class="dietitian-card" data-location="Vancouver" data-insurance="Canada Life,Sun Life Financial,Manulife,Great-West Life,Blue Cross,Chambers of Commerce Group Insurance,Desjardins Insurance,Industrial Alliance,Medavie Blue Cross,GroupHEALTH" data-specialties="Diabetes Management,Heart Health,Autoimmune Conditions,Cancer Nutrition,Gut Health,Food Allergies & Sensitivities,PCOS Management,High Blood Pressure,High Cholesterol,Kidney Disease,Weight Management,Eating Disorders,Pregnancy & Postpartum,Sports Nutrition,Transplant Nutrition,Vegan & Vegetarian,General Nutrition,Pediatric Nutrition,Menopause,Oral Health" data-modalities="Video calls,In-person">
-                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Crect width='120' height='120' rx='60' fill='%23fef3c7'/%3E%3Ctext x='60' y='75' text-anchor='middle' font-size='48' fill='%23d97706'%3E👩‍⚕️%3C/text%3E%3C/svg%3E" alt="Dr. Priya Sharma" class="dietitian-avatar">
-                    
-                    <div class="dietitian-info">
-                        <h2 class="dietitian-name">Dr. Priya Sharma, RD, FICTIONAL</h2>
-                        
-                        <div class="dietitian-credentials">
-                            <div class="credential-badge">
-                                📹 Video calls
-                            </div>
-                            <div class="credential-badge">
-                                👥 In-person
-                            </div>
-                            <div class="insurance-badge">
-                                ✓ Accepts All Major Insurance
-                            </div>
-                        </div>
-
-                        <div class="specialties">
-                            <div class="specialties-label">Specialties:</div>
-                            <div class="specialties-list">
-                                Diabetes Management, Heart Health, Autoimmune Conditions, Cancer Nutrition, Gut Health, Food Allergies & Sensitivities, PCOS Management, High Blood Pressure, High Cholesterol, Kidney Disease, Weight Management, Eating Disorders, Pregnancy & Postpartum, Sports Nutrition, Transplant Nutrition, Vegan & Vegetarian, General Nutrition, Pediatric Nutrition, Menopause, Oral Health
-                            </div>
-                        </div>
-
-                        <p class="dietitian-description">
-                            As a dietitian, I offer my clients a blend of scientific research, prevent disease, and help shape dietary choices for overall wellbeing. I specialize in helping clients with chronic conditions manage their health through personalized nutrition strategies tailored to their unique needs and lifestyle.
-                        </p>
-
-                        <div class="availability">
-                            <div class="availability-slot">July 29<br>2 appt</div>
-                            <div class="availability-slot">August 5<br>3 appt</div>
-                            <div class="availability-slot">August 6<br>5 appt</div>
-                        </div>
-
-                        <div class="dietitian-actions">
-                            <button class="btn-primary" onclick="bookAppointment('Priya Sharma')">Book now</button>
-                            <button class="btn-secondary" onclick="viewProfile('Priya Sharma')">View profile</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Dietitian 3 -->
                 <div class="dietitian-card" data-location="Toronto" data-insurance="Canada Life,Sun Life Financial,Manulife,Great-West Life,Blue Cross,Chambers of Commerce Group Insurance,Desjardins Insurance,Industrial Alliance,Medavie Blue Cross,GroupHEALTH" data-specialties="Weight Management,Diabetes Management,Heart Health,Sports Nutrition,PCOS Management,Autoimmune Conditions,Food Allergies & Sensitivities,Gut Health,General Nutrition,Pregnancy & Postpartum,High Blood Pressure,High Cholesterol,Kidney Disease,Vegan & Vegetarian,Eating Disorders,Pediatric Nutrition,Cancer Nutrition,Menopause,Transplant Nutrition,Oral Health" data-modalities="Video calls,In-person">
                     <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Crect width='120' height='120' rx='60' fill='%23ecfdf5'/%3E%3Ctext x='60' y='75' text-anchor='middle' font-size='48' fill='%2310b981'%3E👩‍⚕️%3C/text%3E%3C/svg%3E" alt="Julia Stanislavskaia" class="dietitian-avatar">
                     
@@ -577,13 +495,13 @@
                         </div>
 
                         <div class="dietitian-actions">
-                            <button class="btn-primary" onclick="bookAppointment('Julia Stanislavskaia')">Book now</button>
+                            <button class="btn-primary" onclick="Calendly.initPopupWidget({url: 'https://calendly.com/jstanislvskaia'}); return false;">Book now</button>
                             <button class="btn-secondary" onclick="viewProfile('Julia Stanislavskaia')">View profile</button>
                         </div>
                     </div>
                 </div>
 
-                <!-- Dietitian 4 -->
+                <!-- Dietitian 2 -->
                 <div class="dietitian-card" data-location="Toronto" data-insurance="Canada Life,Sun Life Financial,Manulife,Great-West Life,Blue Cross,Chambers of Commerce Group Insurance,Desjardins Insurance,Industrial Alliance,Medavie Blue Cross,GroupHEALTH" data-specialties="Weight Management,Diabetes Management,Heart Health,Sports Nutrition,PCOS Management,Autoimmune Conditions,Food Allergies & Sensitivities,Gut Health,General Nutrition,Pregnancy & Postpartum,High Blood Pressure,High Cholesterol,Kidney Disease,Vegan & Vegetarian,Eating Disorders,Pediatric Nutrition,Cancer Nutrition,Menopause,Transplant Nutrition,Oral Health" data-modalities="Video calls,In-person">
                     <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Crect width='120' height='120' rx='60' fill='%23fef2f2'/%3E%3Ctext x='60' y='75' text-anchor='middle' font-size='48' fill='%23dc2626'%3E👩‍⚕️%3C/text%3E%3C/svg%3E" alt="Rowena Leung" class="dietitian-avatar">
                     
@@ -620,7 +538,7 @@
                         </div>
 
                         <div class="dietitian-actions">
-                            <button class="btn-primary" onclick="bookAppointment('Rowena Leung')">Book now</button>
+                            <button class="btn-primary" onclick="Calendly.initPopupWidget({url: 'https://calendly.com/rowenarecommends'}); return false;">Book now</button>
                             <button class="btn-secondary" onclick="viewProfile('Rowena Leung')">View profile</button>
                         </div>
                     </div>
