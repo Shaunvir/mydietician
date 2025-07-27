@@ -829,8 +829,165 @@
             alert(`Viewing profile for ${dietitianName}. This would show detailed profile information.`);
         }
 
-        // Initialize page and filters on page load
-        initializePage();
+        // Access control - check insurance validation before showing results
+        function checkAccessAuthorization() {
+            const accessStatus = sessionStorage.getItem('accessAuthorized');
+            const validationStatus = sessionStorage.getItem('insuranceValidated');
+            const scannedData = sessionStorage.getItem('scannedInsuranceData');
+            
+            console.log('=== ACCESS CONTROL CHECK ===');
+            console.log('Access Status:', accessStatus);
+            console.log('Validation Status:', validationStatus);
+            console.log('Has Scanned Data:', !!scannedData);
+            
+            // Allow access if user has been authorized
+            if (accessStatus === 'true' || accessStatus === 'partial' || accessStatus === 'manual') {
+                console.log('Access granted:', accessStatus);
+                
+                // Show validation status message
+                showAccessMessage(accessStatus, validationStatus);
+                return true;
+            }
+            
+            // Block access if no authorization
+            console.log('Access denied - redirecting to search');
+            blockAccess();
+            return false;
+        }
+        
+        function showAccessMessage(accessStatus, validationStatus) {
+            const headerContent = document.querySelector('.header-content');
+            const messageDiv = document.createElement('div');
+            messageDiv.style.cssText = `
+                position: fixed;
+                top: 80px;
+                right: 20px;
+                padding: 12px 16px;
+                border-radius: 8px;
+                font-size: 14px;
+                font-weight: 500;
+                z-index: 1000;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                max-width: 300px;
+            `;
+            
+            if (validationStatus === 'true') {
+                messageDiv.textContent = '✅ Insurance verified via card scan';
+                messageDiv.style.background = '#ecfdf5';
+                messageDiv.style.color = '#065f46';
+                messageDiv.style.border = '1px solid #bbf7d0';
+            } else if (validationStatus === 'partial') {
+                messageDiv.textContent = '📝 Scanned data edited - verification pending';
+                messageDiv.style.background = '#fffbeb';
+                messageDiv.style.color = '#d97706';
+                messageDiv.style.border = '1px solid #fed7aa';
+            } else {
+                messageDiv.textContent = 'ℹ️ Manual entry - verification pending';
+                messageDiv.style.background = '#eff6ff';
+                messageDiv.style.color = '#1d4ed8';
+                messageDiv.style.border = '1px solid #bfdbfe';
+            }
+            
+            document.body.appendChild(messageDiv);
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                messageDiv.style.opacity = '0';
+                setTimeout(() => {
+                    if (messageDiv.parentNode) {
+                        messageDiv.parentNode.removeChild(messageDiv);
+                    }
+                }, 300);
+            }, 5000);
+        }
+        
+        function blockAccess() {
+            // Clear the body content
+            document.body.innerHTML = `
+                <div style="
+                    min-height: 100vh;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+                    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+                ">
+                    <div style="
+                        background: white;
+                        padding: 48px;
+                        border-radius: 24px;
+                        box-shadow: 0 32px 64px rgba(0, 0, 0, 0.12);
+                        border: 1px solid rgba(0, 0, 0, 0.06);
+                        max-width: 480px;
+                        width: 100%;
+                        margin: 20px;
+                        text-align: center;
+                    ">
+                        <div style="font-size: 64px; margin-bottom: 24px;">🔒</div>
+                        <h1 style="
+                            font-size: 24px;
+                            font-weight: 700;
+                            color: #1a1a1a;
+                            margin-bottom: 16px;
+                        ">Access Restricted</h1>
+                        <p style="
+                            color: #6b7280;
+                            font-size: 16px;
+                            line-height: 1.6;
+                            margin-bottom: 32px;
+                        ">
+                            Insurance verification is required to view dietitian results. 
+                            Please complete the search form with valid insurance information.
+                        </p>
+                        <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+                            <a href="search.html" style="
+                                background: #6366f1;
+                                color: white;
+                                padding: 12px 24px;
+                                border: none;
+                                border-radius: 8px;
+                                font-size: 14px;
+                                font-weight: 600;
+                                text-decoration: none;
+                                display: inline-flex;
+                                align-items: center;
+                                gap: 8px;
+                                transition: all 0.2s ease;
+                            ">
+                                🔍 Complete Search Form
+                            </a>
+                            <a href="scan-card.html" style="
+                                background: #10b981;
+                                color: white;
+                                padding: 12px 24px;
+                                border: none;
+                                border-radius: 8px;
+                                font-size: 14px;
+                                font-weight: 600;
+                                text-decoration: none;
+                                display: inline-flex;
+                                align-items: center;
+                                gap: 8px;
+                                transition: all 0.2s ease;
+                            ">
+                                📷 Scan Insurance Card
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Redirect after 3 seconds if user doesn't click
+            setTimeout(() => {
+                window.location.href = 'search.html';
+            }, 10000);
+        }
+        
+        // Run access control check before initializing page
+        if (checkAccessAuthorization()) {
+            // Initialize page and filters on page load only if access is granted
+            initializePage();
+        }
     </script>
 </body>
 </html>

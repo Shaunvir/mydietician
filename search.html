@@ -174,6 +174,100 @@
             color: #374151;
         }
 
+        /* Scan Card Button */
+        .scan-card-section {
+            margin-bottom: 32px;
+            text-align: center;
+            padding: 24px;
+            background: #f8fafc;
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .scan-card-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+
+        .scan-card-subtitle {
+            font-size: 14px;
+            color: #6b7280;
+            margin-bottom: 16px;
+        }
+
+        .scan-card-button {
+            background: #10b981;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+
+        .scan-card-button:hover {
+            background: #059669;
+            transform: translateY(-1px);
+        }
+
+        /* Scanned Data Indicators */
+        .scanned-field {
+            position: relative;
+        }
+
+        .scanned-field::after {
+            content: '✅ Scanned';
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 12px;
+            color: #059669;
+            font-weight: 500;
+            background: #ecfdf5;
+            padding: 2px 6px;
+            border-radius: 4px;
+            z-index: 3;
+        }
+
+        .scanned-field .form-input,
+        .scanned-field .form-select {
+            border-color: #10b981;
+            background: #f0fdf4;
+            padding-right: 100px;
+        }
+
+        .validation-message {
+            background: #ecfdf5;
+            border: 1px solid #bbf7d0;
+            color: #065f46;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .validation-message.error {
+            background: #fef2f2;
+            border-color: #fecaca;
+            color: #dc2626;
+        }
+
+        .validation-message.warning {
+            background: #fffbeb;
+            border-color: #fed7aa;
+            color: #d97706;
+        }
+
         /* Responsive Design */
         @media (max-width: 640px) {
             .search-container {
@@ -211,6 +305,16 @@
         <div class="search-header">
             <h1 class="search-title">Find a dietitian</h1>
             <p class="search-subtitle">covered by insurance</p>
+        </div>
+
+        <div class="validation-message" id="validationMessage"></div>
+
+        <div class="scan-card-section">
+            <h3 class="scan-card-title">Quick Verification</h3>
+            <p class="scan-card-subtitle">Scan your insurance card to auto-fill information below</p>
+            <a href="scan-card.html" class="scan-card-button">
+                📷 Scan Insurance Card
+            </a>
         </div>
 
         <form id="searchForm" action="results.html" method="GET">
@@ -366,6 +470,13 @@
             submitButton.innerHTML = '<span class="search-icon">⏳</span> Submitting...';
             
             try {
+                // Validate insurance data before submission
+                if (!validateInsuranceData()) {
+                    submitButton.disabled = false;
+                    submitButton.innerHTML = originalText;
+                    return;
+                }
+                
                 // Submit to Sheet Monkey
                 await submitToSheetMonkey(formData);
                 
@@ -391,10 +502,151 @@
             }
         });
 
+        // Check for scanned insurance data on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            checkForScannedData();
+        });
+
+        function checkForScannedData() {
+            const scannedData = sessionStorage.getItem('scannedInsuranceData');
+            const validationStatus = sessionStorage.getItem('insuranceValidated');
+            const urlParams = new URLSearchParams(window.location.search);
+            
+            if (scannedData) {
+                try {
+                    const data = JSON.parse(scannedData);
+                    populateFormWithScannedData(data, validationStatus);
+                    
+                    if (urlParams.get('scanned') === 'true') {
+                        showValidationMessage('✅ Insurance card scanned successfully! Information has been auto-filled.', 'success');
+                    } else if (urlParams.get('scanned') === 'edit') {
+                        showValidationMessage('📝 Scanned data loaded for editing. Please review and modify as needed.', 'info');
+                    }
+                } catch (error) {
+                    console.error('Error parsing scanned data:', error);
+                    sessionStorage.removeItem('scannedInsuranceData');
+                    sessionStorage.removeItem('insuranceValidated');
+                }
+            }
+        }
+
+        function populateFormWithScannedData(data, validationStatus) {
+            // Map the scanned fields to form fields
+            const fieldMappings = {
+                'provider': 'insurance',
+                'memberID': 'member-id',
+                'groupNumber': 'group-number'
+            };
+
+            for (const [scannedField, formFieldId] of Object.entries(fieldMappings)) {
+                if (data[scannedField]) {
+                    const formField = document.getElementById(formFieldId);
+                    if (formField) {
+                        formField.value = data[scannedField];
+                        
+                        // Add scanned indicator styling
+                        const wrapper = formField.closest('.input-wrapper') || formField.closest('.form-group');
+                        if (wrapper) {
+                            wrapper.classList.add('scanned-field');
+                        }
+                    }
+                }
+            }
+
+            // Show expiry warning if card is expired
+            if (data.isExpired) {
+                showValidationMessage('⚠️ Warning: The scanned insurance card appears to be expired. Please verify your coverage.', 'warning');
+            }
+        }
+
+        function showValidationMessage(message, type = 'success') {
+            const messageElement = document.getElementById('validationMessage');
+            messageElement.textContent = message;
+            messageElement.className = 'validation-message';
+            
+            if (type === 'error') {
+                messageElement.classList.add('error');
+            } else if (type === 'warning') {
+                messageElement.classList.add('warning');
+            }
+            
+            messageElement.style.display = 'block';
+            
+            // Auto-hide success messages after 5 seconds
+            if (type === 'success') {
+                setTimeout(() => {
+                    messageElement.style.display = 'none';
+                }, 5000);
+            }
+        }
+
+        // Enhanced form submission with validation checks
+        function validateInsuranceData() {
+            const memberID = document.getElementById('member-id').value;
+            const insurance = document.getElementById('insurance').value;
+            const validationStatus = sessionStorage.getItem('insuranceValidated');
+            
+            // Check if insurance validation is required
+            if (!memberID || !insurance) {
+                showValidationMessage('❌ Please provide both Member ID and Insurance Provider to continue.', 'error');
+                return false;
+            }
+            
+            // Check if we have valid scanned data
+            if (validationStatus === 'true') {
+                // Scanned and validated - allow access
+                sessionStorage.setItem('accessAuthorized', 'true');
+                return true;
+            } else if (validationStatus === 'partial') {
+                // Scanned but edited - allow with warning
+                sessionStorage.setItem('accessAuthorized', 'partial');
+                return true;
+            } else {
+                // Manual entry - require additional verification
+                sessionStorage.setItem('accessAuthorized', 'manual');
+                showValidationMessage('ℹ️ Manual entry detected. Results access will require additional verification.', 'info');
+                return true;
+            }
+        }
+
         // Basic form validation for dropdown
         document.getElementById('location').addEventListener('change', function() {
             if (this.value) {
                 this.style.borderColor = '#6366f1';
+            }
+        });
+
+        // Clear scan data when user manually changes insurance fields
+        document.getElementById('insurance').addEventListener('change', function() {
+            const wrapper = this.closest('.input-wrapper');
+            if (wrapper && wrapper.classList.contains('scanned-field')) {
+                if (confirm('You are modifying scanned data. This will require additional verification. Continue?')) {
+                    wrapper.classList.remove('scanned-field');
+                    sessionStorage.setItem('insuranceValidated', 'manual');
+                } else {
+                    // Restore original scanned value
+                    const scannedData = sessionStorage.getItem('scannedInsuranceData');
+                    if (scannedData) {
+                        const data = JSON.parse(scannedData);
+                        this.value = data.provider || '';
+                    }
+                }
+            }
+        });
+
+        document.getElementById('member-id').addEventListener('input', function() {
+            const wrapper = this.closest('.input-wrapper');
+            if (wrapper && wrapper.classList.contains('scanned-field')) {
+                wrapper.classList.remove('scanned-field');
+                sessionStorage.setItem('insuranceValidated', 'manual');
+            }
+        });
+
+        document.getElementById('group-number').addEventListener('input', function() {
+            const wrapper = this.closest('.input-wrapper');
+            if (wrapper && wrapper.classList.contains('scanned-field')) {
+                wrapper.classList.remove('scanned-field');
+                sessionStorage.setItem('insuranceValidated', 'manual');
             }
         });
     </script>
