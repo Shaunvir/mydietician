@@ -218,6 +218,89 @@
             transform: translateY(-1px);
         }
 
+        /* Mandatory Scanning Styles */
+        .scan-card-section.mandatory {
+            background: #fef2f2;
+            border: 2px solid #fecaca;
+            border-left: 4px solid #dc2626;
+        }
+
+        .scan-card-section.mandatory .scan-card-title {
+            color: #dc2626;
+            font-weight: 700;
+        }
+
+        .scan-card-button.required {
+            background: #dc2626;
+            font-weight: 700;
+            font-size: 15px;
+        }
+
+        .scan-card-button.required:hover {
+            background: #b91c1c;
+        }
+
+        .scan-requirement-note {
+            font-size: 12px;
+            color: #dc2626;
+            margin-top: 12px;
+            font-weight: 600;
+        }
+
+        /* Pulse animation for attention */
+        @keyframes pulse {
+            0%, 100% { 
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4);
+            }
+            50% { 
+                transform: scale(1.05);
+                box-shadow: 0 0 0 10px rgba(220, 38, 38, 0);
+            }
+        }
+
+        /* Success/Completed Scan Styles */
+        .scan-card-section.completed {
+            background: #f0fdf4;
+            border: 2px solid #bbf7d0;
+            border-left: 4px solid #10b981;
+        }
+
+        .scan-card-section.completed .scan-card-title {
+            color: #10b981;
+            font-weight: 700;
+        }
+
+        .scan-card-section.completed .scan-card-subtitle {
+            color: #059669;
+        }
+
+        .scan-card-button.completed {
+            background: #10b981;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .scan-card-button.completed:hover {
+            background: #059669;
+        }
+
+        /* Removed read-only and edit button styles - fields are now directly editable */
+
+        /* Completed scan indicator */
+        .scan-completed-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: #ecfdf5;
+            color: #059669;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 8px;
+        }
+
         /* Scanned Data Indicators */
         .scanned-field {
             position: relative;
@@ -309,12 +392,13 @@
 
         <div class="validation-message" id="validationMessage"></div>
 
-        <div class="scan-card-section">
-            <h3 class="scan-card-title">Quick Verification</h3>
-            <p class="scan-card-subtitle">Scan your insurance card to auto-fill information below</p>
-            <a href="scan-card.html" class="scan-card-button">
-                📷 Scan Insurance Card
+        <div class="scan-card-section mandatory">
+            <h3 class="scan-card-title">📋 Required Step</h3>
+            <p class="scan-card-subtitle">You must scan your insurance card to continue. This ensures accurate coverage verification.</p>
+            <a href="scan-card.html" class="scan-card-button required">
+                📷 Scan Insurance Card (Required)
             </a>
+            <p class="scan-requirement-note">⚠️ Form submission requires a scanned insurance card</p>
         </div>
 
         <form id="searchForm" action="results.html" method="GET">
@@ -378,6 +462,7 @@
                         <option value="Desjardins Insurance">Desjardins Insurance</option>
                         <option value="Industrial Alliance">Industrial Alliance</option>
                         <option value="Medavie Blue Cross">Medavie Blue Cross</option>
+                        <option value="Green Shield Canada">Green Shield Canada</option>
                         <option value="GroupHEALTH">GroupHEALTH</option>
                         <option value="Other">Other</option>
                     </select>
@@ -458,63 +543,23 @@
             }
         }
 
-        document.getElementById('searchForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const formData = new FormData(this);
-            const submitButton = this.querySelector('button[type="submit"]');
-            const originalText = submitButton.innerHTML;
-            
-            // Show loading state
-            submitButton.disabled = true;
-            submitButton.innerHTML = '<span class="search-icon">⏳</span> Submitting...';
-            
-            try {
-                // Validate insurance data before submission
-                if (!validateInsuranceData()) {
-                    submitButton.disabled = false;
-                    submitButton.innerHTML = originalText;
-                    return;
-                }
-                
-                // Submit to Sheet Monkey
-                await submitToSheetMonkey(formData);
-                
-                // Build URL parameters for results page (non-sensitive data only)
-                const params = new URLSearchParams();
-                for (let [key, value] of formData.entries()) {
-                    // Skip sensitive personal data from URL, only include search filters
-                    if (['location', 'insurance', 'specialty'].includes(key) && value) {
-                        params.append(key, value);
-                    }
-                }
-                
-                // Redirect to results page on success
-                window.location.href = 'results.html?' + params.toString();
-                
-            } catch (error) {
-                // Reset button state on error
-                submitButton.disabled = false;
-                submitButton.innerHTML = originalText;
-                
-                // Show user-friendly error message
-                alert('There was an error submitting your information. Please try again.');
-            }
-        });
+        // Form submission is now handled in the validateFormData section above
 
-        // Check for scanned insurance data on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            checkForScannedData();
-        });
+        // Initialization is now handled in the validateFormData section above
 
         function checkForScannedData() {
             const scannedData = sessionStorage.getItem('scannedInsuranceData');
             const validationStatus = sessionStorage.getItem('insuranceValidated');
             const urlParams = new URLSearchParams(window.location.search);
             
-            if (scannedData) {
+            if (scannedData && (validationStatus === 'true' || validationStatus === 'partial')) {
                 try {
                     const data = JSON.parse(scannedData);
+                    
+                    // Update scan section to completed state
+                    updateScanSectionToCompleted(validationStatus);
+                    
+                    // Populate form with scanned data
                     populateFormWithScannedData(data, validationStatus);
                     
                     if (urlParams.get('scanned') === 'true') {
@@ -533,6 +578,7 @@
         function populateFormWithScannedData(data, validationStatus) {
             // Map the scanned fields to form fields
             const fieldMappings = {
+                'memberName': 'name',
                 'provider': 'insurance',
                 'memberID': 'member-id',
                 'groupNumber': 'group-number'
@@ -544,10 +590,12 @@
                     if (formField) {
                         formField.value = data[scannedField];
                         
-                        // Add scanned indicator styling
+                        // Add scanned indicator styling but keep field editable
                         const wrapper = formField.closest('.input-wrapper') || formField.closest('.form-group');
                         if (wrapper) {
                             wrapper.classList.add('scanned-field');
+                            // Mark this field as originally scanned for validation purposes
+                            formField.setAttribute('data-scanned', 'true');
                         }
                     }
                 }
@@ -580,7 +628,7 @@
             }
         }
 
-        // Enhanced form submission with validation checks
+        // Enhanced form submission with validation checks - CARD SCANNING MANDATORY
         function validateInsuranceData() {
             const memberID = document.getElementById('member-id').value;
             const insurance = document.getElementById('insurance').value;
@@ -592,20 +640,158 @@
                 return false;
             }
             
+            // MANDATORY CARD SCANNING - Block manual-only submissions
+            if (validationStatus !== 'true' && validationStatus !== 'partial') {
+                showValidationMessage('🚫 Insurance card scanning is required. Please scan your insurance card to continue.', 'error');
+                // Highlight the scan card button
+                document.querySelector('.scan-card-button').style.animation = 'pulse 2s infinite';
+                return false;
+            }
+
+            // SECURITY CHECK - Validate scanned data integrity
+            if (!validateScannedDataIntegrity()) {
+                showValidationMessage('🚫 Invalid or tampered insurance data detected. Please scan your card again.', 'error');
+                // Clear potentially compromised data
+                clearInsuranceData();
+                return false;
+            }
+            
             // Check if we have valid scanned data
             if (validationStatus === 'true') {
                 // Scanned and validated - allow access
                 sessionStorage.setItem('accessAuthorized', 'true');
                 return true;
             } else if (validationStatus === 'partial') {
-                // Scanned but edited - allow with warning
+                // Scanned but edited - allow access
                 sessionStorage.setItem('accessAuthorized', 'partial');
                 return true;
-            } else {
-                // Manual entry - require additional verification
-                sessionStorage.setItem('accessAuthorized', 'manual');
-                showValidationMessage('ℹ️ Manual entry detected. Results access will require additional verification.', 'info');
-                return true;
+            }
+            
+            // This should never be reached due to the mandatory check above
+            return false;
+        }
+
+        // Security validation functions
+        function validateScannedDataIntegrity() {
+            try {
+                const scannedDataStr = sessionStorage.getItem('scannedInsuranceData');
+                const scanTimestamp = sessionStorage.getItem('_scanTimestamp');
+                
+                if (!scannedDataStr || !scanTimestamp) {
+                    return false;
+                }
+                
+                const scannedData = JSON.parse(scannedDataStr);
+                
+                // Check if data has required security markers
+                if (!scannedData._timestamp || !scannedData._verified || !scannedData._checksum) {
+                    return false;
+                }
+                
+                // Verify timestamp matches
+                if (scannedData._timestamp.toString() !== scanTimestamp) {
+                    return false;
+                }
+                
+                // Verify data is recent (within 1 hour)
+                const currentTime = Date.now();
+                const dataAge = currentTime - scannedData._timestamp;
+                if (dataAge > 3600000) { // 1 hour in milliseconds
+                    return false;
+                }
+                
+                // Verify checksum
+                const dataForChecksum = { ...scannedData };
+                delete dataForChecksum._timestamp;
+                delete dataForChecksum._verified;
+                delete dataForChecksum._checksum;
+                
+                const expectedChecksum = generateChecksum(dataForChecksum, scannedData._timestamp);
+                return expectedChecksum === scannedData._checksum;
+                
+            } catch (error) {
+                console.error('Data integrity validation failed:', error);
+                return false;
+            }
+        }
+
+        function generateChecksum(data, timestamp) {
+            const dataString = JSON.stringify(data) + timestamp.toString();
+            let hash = 0;
+            if (dataString.length === 0) return hash;
+            for (let i = 0; i < dataString.length; i++) {
+                const char = dataString.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash; // Convert to 32-bit integer
+            }
+            return Math.abs(hash).toString(16);
+        }
+
+        function updateScanSectionToCompleted(validationStatus) {
+            const scanSection = document.querySelector('.scan-card-section');
+            const scanTitle = scanSection.querySelector('.scan-card-title');
+            const scanSubtitle = scanSection.querySelector('.scan-card-subtitle');
+            const scanButton = scanSection.querySelector('.scan-card-button');
+            const scanNote = scanSection.querySelector('.scan-requirement-note');
+            
+            // Update styling to completed state
+            scanSection.classList.remove('mandatory');
+            scanSection.classList.add('completed');
+            
+            // Update content
+            scanTitle.textContent = '✅ Completed Step';
+            scanSubtitle.textContent = 'Your insurance card has been successfully scanned and verified.';
+            
+            // Update button
+            scanButton.classList.remove('required');
+            scanButton.classList.add('completed');
+            scanButton.innerHTML = '📝 Edit Scanned Data';
+            
+            // Add completion badge
+            if (scanNote) {
+                scanNote.innerHTML = '<div class="scan-completed-badge">🎉 Scan Complete - Ready to Submit</div>';
+            }
+        }
+        
+        // addEditButton function removed - fields are now directly editable
+
+        function clearInsuranceData() {
+            sessionStorage.removeItem('scannedInsuranceData');
+            sessionStorage.removeItem('insuranceValidated');
+            sessionStorage.removeItem('_scanTimestamp');
+            sessionStorage.removeItem('accessAuthorized');
+            
+            // Reset form fields
+            document.getElementById('member-id').value = '';
+            document.getElementById('insurance').value = '';
+            document.getElementById('name').value = '';
+            document.getElementById('group-number').value = '';
+            
+            // Remove scanned field indicators
+            document.querySelectorAll('.scanned-field').forEach(field => {
+                field.classList.remove('scanned-field');
+                const input = field.querySelector('input, select');
+                if (input) {
+                    input.removeAttribute('data-scanned');
+                }
+            });
+            
+            // Reset scan section to mandatory state
+            const scanSection = document.querySelector('.scan-card-section');
+            const scanTitle = scanSection.querySelector('.scan-card-title');
+            const scanSubtitle = scanSection.querySelector('.scan-card-subtitle');
+            const scanButton = scanSection.querySelector('.scan-card-button');
+            const scanNote = scanSection.querySelector('.scan-requirement-note');
+            
+            scanSection.classList.remove('completed');
+            scanSection.classList.add('mandatory');
+            scanTitle.textContent = '📋 Required Step';
+            scanSubtitle.textContent = 'You must scan your insurance card to continue. This ensures accurate coverage verification.';
+            scanButton.classList.remove('completed');
+            scanButton.classList.add('required');
+            scanButton.innerHTML = '📷 Scan Insurance Card (Required)';
+            if (scanNote) {
+                scanNote.innerHTML = '⚠️ Form submission requires a scanned insurance card';
             }
         }
 
@@ -616,39 +802,194 @@
             }
         });
 
-        // Clear scan data when user manually changes insurance fields
-        document.getElementById('insurance').addEventListener('change', function() {
-            const wrapper = this.closest('.input-wrapper');
-            if (wrapper && wrapper.classList.contains('scanned-field')) {
-                if (confirm('You are modifying scanned data. This will require additional verification. Continue?')) {
-                    wrapper.classList.remove('scanned-field');
-                    sessionStorage.setItem('insuranceValidated', 'manual');
-                } else {
-                    // Restore original scanned value
-                    const scannedData = sessionStorage.getItem('scannedInsuranceData');
-                    if (scannedData) {
-                        const data = JSON.parse(scannedData);
-                        this.value = data.provider || '';
+        // Handle form validation for both scanned and manual data
+        function validateFormData() {
+            const memberID = document.getElementById('member-id').value;
+            const insurance = document.getElementById('insurance').value;
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const phone = document.getElementById('phone').value;
+            const location = document.getElementById('location').value;
+            
+            // Check required fields
+            if (!name || !email || !phone || !location || !memberID || !insurance) {
+                showValidationMessage('❌ Please fill in all required fields to continue.', 'error');
+                return false;
+            }
+            
+            return true;
+        }
+        
+        // Update form submission to use better validation
+        document.getElementById('searchForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // First validate form data
+            if (!validateFormData()) {
+                return;
+            }
+            
+            // Then validate insurance data (scanned requirement)
+            if (!validateInsuranceData()) {
+                return;
+            }
+            
+            const formData = new FormData(this);
+            const submitButton = this.querySelector('button[type="submit"]');
+            const originalText = submitButton.innerHTML;
+            
+            // Show loading state
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<span class="search-icon">⏳</span> Submitting...';
+            
+            try {
+                // Submit to Sheet Monkey
+                await submitToSheetMonkey(formData);
+                
+                // Build URL parameters for results page (non-sensitive data only)
+                const params = new URLSearchParams();
+                for (let [key, value] of formData.entries()) {
+                    // Skip sensitive personal data from URL, only include search filters
+                    if (['location', 'insurance', 'specialty'].includes(key) && value) {
+                        params.append(key, value);
                     }
                 }
+                
+                // Redirect to results page on success
+                window.location.href = 'results.html?' + params.toString();
+                
+            } catch (error) {
+                // Reset button state on error
+                submitButton.disabled = false;
+                submitButton.innerHTML = originalText;
+                
+                // Show user-friendly error message
+                alert('There was an error submitting your information. Please try again.');
             }
         });
+        
+        // Add field change handlers to preserve scan validation status
+        function addScannedFieldHandlers() {
+            const scannedFields = ['name', 'insurance', 'member-id', 'group-number'];
+            
+            scannedFields.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                if (field && field.hasAttribute('data-scanned')) {
+                    field.addEventListener('input', function() {
+                        // When user edits a scanned field, maintain scan validity but mark as partial
+                        const currentStatus = sessionStorage.getItem('insuranceValidated');
+                        if (currentStatus === 'true') {
+                            sessionStorage.setItem('insuranceValidated', 'partial');
+                        }
+                        // Keep the visual scanned indicator even after editing
+                    });
+                    
+                    field.addEventListener('change', function() {
+                        // Same logic for select dropdowns
+                        const currentStatus = sessionStorage.getItem('insuranceValidated');
+                        if (currentStatus === 'true') {
+                            sessionStorage.setItem('insuranceValidated', 'partial');
+                        }
+                    });
+                }
+            });
+        }
 
-        document.getElementById('member-id').addEventListener('input', function() {
-            const wrapper = this.closest('.input-wrapper');
-            if (wrapper && wrapper.classList.contains('scanned-field')) {
-                wrapper.classList.remove('scanned-field');
-                sessionStorage.setItem('insuranceValidated', 'manual');
+        // Session management - track legitimate navigation
+        let isLegitimateNavigation = false;
+        let formSubmitting = false;
+        
+        // Mark legitimate navigation events
+        function markLegitimateNavigation() {
+            isLegitimateNavigation = true;
+            setTimeout(() => {
+                isLegitimateNavigation = false;
+            }, 1000); // Reset after 1 second
+        }
+        
+        // Session cleanup function
+        function cleanupSession() {
+            // Don't cleanup during legitimate navigation or form submission
+            if (isLegitimateNavigation || formSubmitting) {
+                console.log('Skipping cleanup - legitimate navigation detected');
+                return;
+            }
+            
+            console.log('Cleaning up session data due to page exit');
+            
+            // Clear all scan-related session data
+            sessionStorage.removeItem('scannedInsuranceData');
+            sessionStorage.removeItem('insuranceValidated');
+            sessionStorage.removeItem('_scanTimestamp');
+            sessionStorage.removeItem('accessAuthorized');
+            
+            // Clear any other temporary data
+            sessionStorage.removeItem('scanInProgress');
+            
+            console.log('Session cleanup completed');
+        }
+        
+        // Handle page unload events
+        window.addEventListener('beforeunload', function(e) {
+            // Check if this is legitimate navigation
+            const isRefresh = performance.navigation && performance.navigation.type === performance.navigation.TYPE_RELOAD;
+            
+            // Don't cleanup on page refresh
+            if (isRefresh) {
+                return;
+            }
+            
+            // Schedule cleanup for after the navigation completes
+            setTimeout(cleanupSession, 100);
+        });
+        
+        // Backup event for mobile browsers and cases where beforeunload doesn't fire
+        window.addEventListener('pagehide', function(e) {
+            // Only cleanup if page is being hidden (not just backgrounded)
+            if (!e.persisted && !isLegitimateNavigation && !formSubmitting) {
+                cleanupSession();
             }
         });
-
-        document.getElementById('group-number').addEventListener('input', function() {
-            const wrapper = this.closest('.input-wrapper');
-            if (wrapper && wrapper.classList.contains('scanned-field')) {
-                wrapper.classList.remove('scanned-field');
-                sessionStorage.setItem('insuranceValidated', 'manual');
-            }
+        
+        // Initialize the form on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            checkForScannedData();
+            // Add handlers after form is populated with delay to ensure fields are processed
+            setTimeout(addScannedFieldHandlers, 200);
+            
+            // Add click handlers for legitimate navigation
+            setupNavigationHandlers();
         });
+        
+        function setupNavigationHandlers() {
+            // Mark scan card navigation as legitimate
+            const scanCardLinks = document.querySelectorAll('a[href="scan-card.html"], .scan-card-button');
+            scanCardLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    console.log('Legitimate navigation to scan-card.html');
+                    markLegitimateNavigation();
+                });
+            });
+            
+            // Mark form submission as legitimate
+            const form = document.getElementById('searchForm');
+            if (form) {
+                form.addEventListener('submit', function() {
+                    console.log('Form submission - marking as legitimate navigation');
+                    formSubmitting = true;
+                    markLegitimateNavigation();
+                });
+            }
+            
+            // Also handle back button detection
+            window.addEventListener('popstate', function(e) {
+                // Back button pressed - this should trigger cleanup unless it's legitimate
+                console.log('Back button detected');
+                if (!isLegitimateNavigation && !formSubmitting) {
+                    setTimeout(cleanupSession, 50);
+                }
+            });
+        }
     </script>
 </body>
 </html>

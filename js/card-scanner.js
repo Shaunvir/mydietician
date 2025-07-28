@@ -14,7 +14,6 @@ class InsuranceCardScanner {
         document.getElementById('startCamera').addEventListener('click', () => this.startCamera());
         document.getElementById('captureBtn').addEventListener('click', () => this.captureImage());
         document.getElementById('retakeBtn').addEventListener('click', () => this.retakePhoto());
-        document.getElementById('fileInput').addEventListener('change', (e) => this.handleFileUpload(e));
         document.getElementById('useDataBtn').addEventListener('click', () => this.useExtractedData());
         document.getElementById('editDataBtn').addEventListener('click', () => this.editAndContinue());
     }
@@ -37,7 +36,7 @@ class InsuranceCardScanner {
             document.getElementById('startCamera').disabled = true;
 
         } catch (error) {
-            this.showError('Camera access denied or not available. Please use the file upload option instead.');
+            this.showError('Camera access is required to scan your insurance card. Please allow camera access and try again.');
             console.error('Camera access error:', error);
         }
     }
@@ -55,11 +54,28 @@ class InsuranceCardScanner {
         // Capture current frame
         this.context.drawImage(this.video, 0, 0);
 
+        // Show flash effect and success message
+        this.showCaptureConfirmation();
+
         // Convert to blob and process
         this.canvas.toBlob(async (blob) => {
-            // Create a file-like object with proper name and type
-            const file = new File([blob], 'camera-capture.jpg', { type: 'image/jpeg' });
-            await this.processImage(file);
+            // Store the captured image data for preview
+            this.capturedImageBlob = blob;
+            
+            // Show captured image preview
+            this.showCapturedImagePreview(blob);
+            
+            // Add brief delay before processing to let user see the confirmation
+            setTimeout(async () => {
+                try {
+                    // Optimize image for OCR processing
+                    const optimizedFile = await this.optimizeImageForOCR(blob);
+                    await this.processImage(optimizedFile);
+                } catch (error) {
+                    console.error('Image optimization error:', error);
+                    this.showError('Failed to optimize image for processing. Please try again.');
+                }
+            }, 1500);
         }, 'image/jpeg', 0.8);
 
         // Show retake button
@@ -72,32 +88,50 @@ class InsuranceCardScanner {
         document.getElementById('captureBtn').style.display = 'inline-flex';
         this.hideError();
         this.hideExtractedData();
+        
+        // Remove success message and preview
+        const successMessage = document.getElementById('successMessage');
+        if (successMessage) {
+            successMessage.remove();
+        }
+        
+        const capturedPreview = document.getElementById('capturedPreview');
+        if (capturedPreview) {
+            capturedPreview.remove();
+        }
+        
+        // Clear stored image data
+        this.capturedImageBlob = null;
     }
 
-    async handleFileUpload(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-
-        if (!file.type.startsWith('image/')) {
-            this.showError('Please select an image file.');
-            return;
-        }
-
-        if (file.size > 5 * 1024 * 1024) { // 5MB limit
-            this.showError('Image file too large. Please select an image under 5MB.');
-            return;
-        }
-
-        await this.processImage(file);
-    }
 
     async processImage(imageFile) {
-        this.showLoading();
+        this.showLoading('📤 Uploading image to OCR service...');
         this.hideError();
 
         try {
-            const extractedText = await this.performOCR(imageFile);
+            // Step 1: Upload and OCR processing with retry feedback
+            const extractedText = await this.performOCR(imageFile, 1, 3, (attempt, maxRetries, status) => {
+                if (attempt > 1) {
+                    this.showLoading(`🔄 Retry ${attempt-1}/${maxRetries-1}: ${status}`);
+                } else {
+                    this.showLoading('📤 Uploading image to OCR service...');
+                }
+            });
+            console.log('=== OCR EXTRACTION RESULTS ===');
+        console.log('Raw OCR Text:', extractedText);
+        console.log('Text length:', extractedText.length);
+        console.log('================================');
+            
+            // Step 2: Parse the extracted data
+            this.showLoading('🔍 Analyzing insurance card data...');
+            await new Promise(resolve => setTimeout(resolve, 500)); // Brief pause for UX
+            
             const parsedData = this.parseInsuranceData(extractedText);
+            
+            // Step 3: Validate and display results
+            this.showLoading('✅ Finalizing card information...');
+            await new Promise(resolve => setTimeout(resolve, 300)); // Brief pause for UX
             
             if (parsedData && Object.keys(parsedData).length > 0) {
                 this.extractedData = parsedData;
@@ -108,28 +142,55 @@ class InsuranceCardScanner {
         } catch (error) {
             console.error('OCR processing error:', error);
             
-            // More specific error handling
-            if (error.message.includes('file type') || error.message.includes('E216')) {
-                this.showError('Image format not supported. Please try a different image or use manual entry.');
+            // Enhanced error handling for specific OCR error codes
+            if (error.message.includes('Image file is too large')) {
+                this.showError('Image is too large for processing. Please try taking a photo from further away.');
+            } else if (error.message.includes('Image file is too small')) {
+                this.showError('Image is too small. Please ensure the insurance card fills most of the camera view.');
+            } else if (error.message.includes('Invalid file type')) {
+                this.showError('Invalid image format. Please take a new photo and try again.');
+            } else if (error.message.includes('timed out after multiple attempts')) {
+                this.showError('OCR processing timed out. Please ensure good lighting and try with a clearer image of your card.');
+            } else if (error.message.includes('No text could be extracted')) {
+                this.showError('Could not read text from the image. Please ensure the card is clearly visible, well-lit, and in focus.');
+            } else if (error.message.includes('E101')) {
+                this.showError('Processing timed out. Please try again with better lighting and a clearer image.');
+            } else if (error.message.includes('E102') || error.message.includes('E103')) {
+                this.showError('Image processing failed. Please ensure the card is flat, well-lit, and clearly visible.');
+            } else if (error.message.includes('file type') || error.message.includes('E216')) {
+                this.showError('Image format not supported. Please take a new photo and try again.');
             } else if (error.message.includes('OCR API error: 429')) {
-                this.showError('OCR service temporarily busy. Please wait a moment and try again.');
+                this.showError('OCR service is temporarily busy. Please wait a moment and try again.');
             } else if (error.message.includes('OCR API error: 401')) {
                 this.showError('OCR service authentication error. Please try manual entry.');
+            } else if (error.message.includes('network') || error.message.includes('fetch')) {
+                this.showError('Network connection issue. Please check your internet connection and try again.');
             } else {
-                this.showError('Failed to process the image. Please try again or use manual entry.');
+                this.showError('Failed to process the image. Please ensure good lighting and try again, or use manual entry.');
             }
         } finally {
             this.hideLoading();
         }
     }
 
-    async performOCR(imageFile) {
+    async performOCR(imageFile, attempt = 1, maxRetries = 3, progressCallback = null) {
+        // Validate image before processing
+        try {
+            this.validateImageForOCR(imageFile);
+        } catch (validationError) {
+            throw validationError;
+        }
+        
+        // Choose OCR engine based on attempt (Engine 1 is more reliable)
+        const ocrEngine = attempt <= 2 ? '1' : '2';
+        
         const formData = new FormData();
         formData.append('apikey', this.OCR_API_KEY);
         formData.append('language', 'eng');
         formData.append('isOverlayRequired', 'false');
-        formData.append('OCREngine', '2');
-        formData.append('filetype', 'JPG'); // Explicit file type for OCR.space
+        formData.append('OCREngine', ocrEngine);
+        formData.append('filetype', 'JPG');
+        formData.append('detectOrientation', 'true'); // Help with rotated cards
         
         // Ensure proper filename with extension
         let fileName = imageFile.name || 'insurance-card.jpg';
@@ -141,28 +202,83 @@ class InsuranceCardScanner {
         
         formData.append('file', imageFile, fileName);
 
-        const response = await fetch(this.OCR_API_URL, {
-            method: 'POST',
-            body: formData
-        });
+        try {
+            console.log(`OCR attempt ${attempt}/${maxRetries} using Engine ${ocrEngine}`);
+            
+            const response = await fetch(this.OCR_API_URL, {
+                method: 'POST',
+                body: formData
+            });
 
-        if (!response.ok) {
-            throw new Error(`OCR API error: ${response.status}`);
-        }
+            if (!response.ok) {
+                throw new Error(`OCR API error: ${response.status}`);
+            }
 
-        const result = await response.json();
-        
-        if (result.IsErroredOnProcessing) {
-            console.error('OCR API detailed error:', result);
-            throw new Error(`OCR processing error: ${result.ErrorMessage}`);
-        }
-        
-        // Additional validation
-        if (!result.ParsedResults || result.ParsedResults.length === 0) {
-            throw new Error('No text could be extracted from the image');
-        }
+            const result = await response.json();
+            
+            if (result.IsErroredOnProcessing) {
+                console.error('OCR API detailed error:', result);
+                const errorMsg = Array.isArray(result.ErrorMessage) ? result.ErrorMessage[0] : result.ErrorMessage;
+                
+                // Check for specific timeout error (E101)
+                if (errorMsg && errorMsg.includes('E101')) {
+                    if (attempt < maxRetries) {
+                        console.log(`Timeout error (E101), retrying... (${attempt}/${maxRetries})`);
+                        if (progressCallback) {
+                            progressCallback(attempt + 1, maxRetries, 'Processing timed out, trying again...');
+                        }
+                        // Wait before retry with exponential backoff
+                        await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+                        return this.performOCR(imageFile, attempt + 1, maxRetries, progressCallback);
+                    } else {
+                        throw new Error('OCR service timed out after multiple attempts. Please try with a clearer image.');
+                    }
+                }
+                
+                // Check for other specific errors
+                if (errorMsg && (errorMsg.includes('E102') || errorMsg.includes('E103'))) {
+                    if (attempt < maxRetries) {
+                        console.log(`OCR processing error, retrying with different engine... (${attempt}/${maxRetries})`);
+                        if (progressCallback) {
+                            progressCallback(attempt + 1, maxRetries, 'Trying with different OCR engine...');
+                        }
+                        await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+                        return this.performOCR(imageFile, attempt + 1, maxRetries, progressCallback);
+                    }
+                }
+                
+                throw new Error(`OCR processing error: ${errorMsg}`);
+            }
+            
+            // Additional validation
+            if (!result.ParsedResults || result.ParsedResults.length === 0) {
+                if (attempt < maxRetries) {
+                    console.log(`No text extracted, retrying... (${attempt}/${maxRetries})`);
+                    if (progressCallback) {
+                        progressCallback(attempt + 1, maxRetries, 'No text found, adjusting settings...');
+                    }
+                    await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+                    return this.performOCR(imageFile, attempt + 1, maxRetries, progressCallback);
+                } else {
+                    throw new Error('No text could be extracted from the image after multiple attempts');
+                }
+            }
 
-        return result.ParsedResults[0]?.ParsedText || '';
+            console.log(`OCR successful on attempt ${attempt}`);
+            return result.ParsedResults[0]?.ParsedText || '';
+            
+        } catch (networkError) {
+            // Handle network errors with retry
+            if (attempt < maxRetries && (networkError.message.includes('fetch') || networkError.message.includes('network'))) {
+                console.log(`Network error, retrying... (${attempt}/${maxRetries})`);
+                if (progressCallback) {
+                    progressCallback(attempt + 1, maxRetries, 'Connection issue, retrying...');
+                }
+                await new Promise(resolve => setTimeout(resolve, 2000 * attempt));
+                return this.performOCR(imageFile, attempt + 1, maxRetries, progressCallback);
+            }
+            throw networkError;
+        }
     }
 
     parseInsuranceData(text) {
@@ -171,17 +287,44 @@ class InsuranceCardScanner {
         
         // Common patterns for Canadian insurance cards
         const patterns = {
+            memberName: [
+                // Direct name patterns with labels
+                /(?:name|member name|cardholder|member|employee name)[\s:]*([A-Z][a-z]+(?:\s+[A-Z]?[a-z]+)*)/i,
+                /(?:employee|covered person|beneficiary)[\s:]*([A-Z][a-z]+(?:\s+[A-Z]?[a-z]+)*)/i,
+                // Names on separate lines (more flexible)
+                /^([A-Z][A-Z\s]*[A-Z])$/,  // All caps names
+                /^([A-Z][a-z]+(?:\s+[A-Z][a-z]*){1,3})$/,  // Title case names
+                // Names with prefixes (more flexible)
+                /(?:mr|ms|mrs|dr|miss)[\s\.]*([A-Z][a-z]+(?:\s+[A-Z]?[a-z]*)*)/i,
+                // Common name formats on insurance cards
+                /([A-Z][a-z]+[,\s]+[A-Z][a-z]+)/,  // "Last, First" format
+                /([A-Z][a-z]{1,}(?:\s+[A-Z](?:\.|[a-z]{1,}))*\s+[A-Z][a-z]{1,})/,  // "First M. Last" format
+                // Generic name-like patterns (broader)
+                /\b([A-Z][a-z]{1,}(?:\s+[A-Z]?[a-z]{1,}){1,3})\b/,
+                // Single name fallback
+                /\b([A-Z][a-z]{3,})\b/
+            ],
             memberID: [
-                /(?:member|member id|id|policy|certificate)[\s#:]*([A-Z0-9-]{6,15})/i,
-                /\b([A-Z]{2,3}[0-9]{6,10})\b/i,
-                /\b([0-9]{8,12})\b/
+                // Labeled member ID patterns (more comprehensive)
+                /(?:member|member id|id|policy|certificate|plan id)[\s#:]*([A-Z0-9-]{6,25})/i,
+                // IDs ending with -00 or similar
+                /(?:member|member id|id)[\s#:]*([A-Z0-9-]+-[0-9]{2,3})/i,
+                // Standard formats with better boundary detection
+                /\b([A-Z]{2,4}[0-9]{6,12}-?[0-9]{0,3})\b/i,
+                /\b([0-9]{8,16}-?[0-9]{0,3})\b/,
+                // Complex IDs with multiple segments including trailing numbers
+                /\b([A-Z0-9]{2,4}[-\s][A-Z0-9]{3,8}[-\s][A-Z0-9]{2,8})\b/i,
+                // IDs with trailing segments (like -00)
+                /\b([A-Z0-9]{3,}[-][0-9]{2,3})\b/i,
+                // Generic alphanumeric with dashes (catch-all)
+                /\b([A-Z0-9-]{8,25})\b/i
             ],
             groupNumber: [
                 /(?:group|grp|group no|group number)[\s#:]*([A-Z0-9-]{3,12})/i,
                 /\b(GRP[A-Z0-9-]{3,10})\b/i
             ],
             provider: [
-                /\b(canada life|great-west life|manulife|sun life|blue cross|desjardins|industrial alliance|medavie)\b/i
+                /\b(canada life|great-west life|manulife|sun life|blue cross|desjardins|industrial alliance|medavie|greenshield|green shield|gsc)\b/i
             ],
             expiryDate: [
                 /(?:exp|expiry|expires|valid until)[\s:]*([0-9]{1,2}[\/\-][0-9]{1,2}[\/\-][0-9]{2,4})/i,
@@ -193,17 +336,46 @@ class InsuranceCardScanner {
             ]
         };
 
-        // Extract data using patterns
+        // Extract data using patterns with enhanced logging
+        console.log('OCR Text Lines for parsing:', lines);
+        
         for (const [field, fieldPatterns] of Object.entries(patterns)) {
-            for (const pattern of fieldPatterns) {
+            console.log(`\nExtracting field: ${field}`);
+            
+            for (let i = 0; i < fieldPatterns.length; i++) {
+                const pattern = fieldPatterns[i];
+                console.log(`  Trying pattern ${i + 1}:`, pattern);
+                
                 for (const line of lines) {
                     const match = line.match(pattern);
                     if (match) {
-                        data[field] = match[1].trim();
+                        console.log(`    Pattern matched on line: "${line}"`);
+                        console.log(`    Raw match:`, match[1]);
+                        
+                        let extractedValue = match[1].trim();
+                        
+                        // Special handling for names
+                        if (field === 'memberName') {
+                            extractedValue = this.validateAndFormatName(extractedValue);
+                            if (!extractedValue) {
+                                console.log(`    Name validation failed, trying next match`);
+                                continue; // Skip invalid names
+                            }
+                        }
+                        
+                        console.log(`    Final extracted value: "${extractedValue}"`);
+                        data[field] = extractedValue;
                         break;
                     }
                 }
-                if (data[field]) break;
+                if (data[field]) {
+                    console.log(`  ✓ Successfully extracted ${field}: "${data[field]}"`);
+                    break;
+                }
+            }
+            
+            if (!data[field]) {
+                console.log(`  ✗ Failed to extract ${field}`);
             }
         }
 
@@ -225,16 +397,75 @@ class InsuranceCardScanner {
 
         return data;
     }
+    
+    // Validate and format extracted names
+    validateAndFormatName(name) {
+        if (!name || name.length < 2) return null;
+        
+        console.log('Validating name:', name);
+        
+        // Clean up the name
+        let cleanName = name.trim().replace(/[,\s]+/g, ' ');
+        
+        // Remove only strongly insurance-specific words (more targeted exclusion)
+        const strongExcludeWords = /^(card|insurance|policy|plan|group|exp|expires|id|number|coverage|benefits)$/i;
+        const words = cleanName.split(/\s+/);
+        
+        // Filter out only standalone insurance words, not names that contain them
+        const filteredWords = words.filter(word => !strongExcludeWords.test(word));
+        
+        if (filteredWords.length === 0) {
+            console.log('Name rejected: all words were insurance terms');
+            return null;
+        }
+        
+        // More flexible validation - allow 1-4 words
+        if (filteredWords.length > 4) {
+            console.log('Name rejected: too many words');
+            return null;
+        }
+        
+        // Validate each word looks like it could be a name part (more permissive)
+        const validWords = filteredWords.filter(word => {
+            // Allow shorter words (like "Li", "Wu", etc.) and more characters
+            return word.length >= 1 && /^[A-Za-z][A-Za-z'.-]*$/.test(word) && word.length <= 20;
+        });
+        
+        if (validWords.length === 0) {
+            console.log('Name rejected: no valid word patterns');
+            return null;
+        }
+        
+        // Use all valid words even if some were filtered
+        const finalName = validWords.map(word => 
+            word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+        ).join(' ');
+        
+        console.log('Name accepted:', finalName);
+        return finalName;
+    }
 
     validateMemberID(memberID) {
-        // Remove spaces and normalize
-        const cleaned = memberID.replace(/\s+/g, '').toUpperCase();
+        console.log('Validating member ID:', memberID);
         
-        // Basic validation - should be alphanumeric with possible hyphens
-        if (/^[A-Z0-9-]{6,15}$/.test(cleaned)) {
+        // Preserve original formatting but clean up excessive spaces
+        const cleaned = memberID.replace(/\s{2,}/g, ' ').trim().toUpperCase();
+        
+        // Extended validation - alphanumeric with hyphens, spaces, and longer length (up to 25 chars)
+        if (/^[A-Z0-9\s-]{6,25}$/.test(cleaned)) {
+            console.log('Member ID accepted (with spaces):', cleaned);
             return cleaned;
         }
-        return memberID; // Return original if validation fails
+        
+        // If validation fails, try removing spaces and keeping only alphanumeric + hyphens
+        const spacesRemoved = cleaned.replace(/\s+/g, '');
+        if (/^[A-Z0-9-]{6,25}$/.test(spacesRemoved)) {
+            console.log('Member ID accepted (spaces removed):', spacesRemoved);
+            return spacesRemoved;
+        }
+        
+        console.log('Member ID validation failed, returning original:', memberID);
+        return memberID; // Return original if all validation fails
     }
 
     validateExpiryDate(dateStr) {
@@ -284,7 +515,10 @@ class InsuranceCardScanner {
             'blue cross': 'Blue Cross',
             'desjardins': 'Desjardins Insurance',
             'industrial alliance': 'Industrial Alliance',
-            'medavie': 'Medavie Blue Cross'
+            'medavie': 'Medavie Blue Cross',
+            'greenshield': 'Green Shield Canada',
+            'green shield': 'Green Shield Canada',
+            'gsc': 'Green Shield Canada'
         };
 
         const normalized = provider.toLowerCase();
@@ -302,6 +536,7 @@ class InsuranceCardScanner {
         dataFields.innerHTML = '';
 
         const fieldLabels = {
+            memberName: 'Member Name',
             provider: 'Insurance Provider',
             memberID: 'Member ID',
             groupNumber: 'Group Number',
@@ -341,9 +576,19 @@ class InsuranceCardScanner {
             return;
         }
 
-        // Store data in session storage
-        sessionStorage.setItem('scannedInsuranceData', JSON.stringify(this.extractedData));
+        // Add security enhancements to prevent tampering
+        const timestamp = Date.now();
+        const dataWithSecurity = {
+            ...this.extractedData,
+            _timestamp: timestamp,
+            _verified: true,
+            _checksum: this.generateChecksum(this.extractedData, timestamp)
+        };
+
+        // Store data in session storage with security markers
+        sessionStorage.setItem('scannedInsuranceData', JSON.stringify(dataWithSecurity));
         sessionStorage.setItem('insuranceValidated', 'true');
+        sessionStorage.setItem('_scanTimestamp', timestamp.toString());
 
         // Redirect to search form with validation flag
         window.location.href = 'search.html?scanned=true';
@@ -355,16 +600,33 @@ class InsuranceCardScanner {
             return;
         }
 
-        // Store data for editing
-        sessionStorage.setItem('scannedInsuranceData', JSON.stringify(this.extractedData));
+        // Add security enhancements to prevent tampering
+        const timestamp = Date.now();
+        const dataWithSecurity = {
+            ...this.extractedData,
+            _timestamp: timestamp,
+            _verified: true,
+            _checksum: this.generateChecksum(this.extractedData, timestamp)
+        };
+
+        // Store data for editing with security markers
+        sessionStorage.setItem('scannedInsuranceData', JSON.stringify(dataWithSecurity));
         sessionStorage.setItem('insuranceValidated', 'partial');
+        sessionStorage.setItem('_scanTimestamp', timestamp.toString());
 
         // Redirect to search form
         window.location.href = 'search.html?scanned=edit';
     }
 
-    showLoading() {
-        document.getElementById('loadingState').style.display = 'block';
+    showLoading(step = 'Processing your insurance card...') {
+        const loadingElement = document.getElementById('loadingState');
+        loadingElement.style.display = 'block';
+        
+        // Update loading text with current step
+        const loadingText = loadingElement.querySelector('p');
+        if (loadingText) {
+            loadingText.textContent = step;
+        }
     }
 
     hideLoading() {
@@ -383,6 +645,239 @@ class InsuranceCardScanner {
 
     hideExtractedData() {
         document.getElementById('extractedData').style.display = 'none';
+    }
+
+    showCaptureConfirmation() {
+        // Create flash effect
+        const flashOverlay = document.createElement('div');
+        flashOverlay.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: white;
+            z-index: 9999;
+            opacity: 0.8;
+            pointer-events: none;
+        `;
+        document.body.appendChild(flashOverlay);
+        
+        // Remove flash after animation
+        setTimeout(() => {
+            document.body.removeChild(flashOverlay);
+        }, 200);
+        
+        // Show success message
+        this.showSuccessMessage('📸 Photo captured successfully!');
+        
+        // Play camera shutter sound (if supported)
+        this.playCaptureSound();
+    }
+    
+    showCapturedImagePreview(blob) {
+        const videoContainer = document.querySelector('.video-container');
+        
+        // Remove any existing preview
+        const existingPreview = document.getElementById('capturedPreview');
+        if (existingPreview) {
+            existingPreview.remove();
+        }
+        
+        // Create preview element
+        const previewContainer = document.createElement('div');
+        previewContainer.id = 'capturedPreview';
+        previewContainer.style.cssText = `
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 80px;
+            height: 60px;
+            border: 2px solid #10b981;
+            border-radius: 8px;
+            overflow: hidden;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            z-index: 10;
+        `;
+        
+        const previewImg = document.createElement('img');
+        previewImg.style.cssText = `
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        `;
+        
+        // Convert blob to data URL for preview
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            previewImg.src = e.target.result;
+        };
+        reader.readAsDataURL(blob);
+        
+        previewContainer.appendChild(previewImg);
+        videoContainer.appendChild(previewContainer);
+    }
+    
+    showSuccessMessage(message) {
+        // Remove any existing success message
+        const existingSuccess = document.getElementById('successMessage');
+        if (existingSuccess) {
+            existingSuccess.remove();
+        }
+        
+        const successElement = document.createElement('div');
+        successElement.id = 'successMessage';
+        successElement.style.cssText = `
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            color: #059669;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            text-align: center;
+            font-weight: 600;
+            animation: slideIn 0.3s ease-out;
+        `;
+        successElement.textContent = message;
+        
+        // Add animation keyframes if not already added
+        if (!document.getElementById('successAnimation')) {
+            const style = document.createElement('style');
+            style.id = 'successAnimation';
+            style.textContent = `
+                @keyframes slideIn {
+                    from { opacity: 0; transform: translateY(-10px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+        
+        // Insert before error message
+        const errorElement = document.getElementById('errorMessage');
+        errorElement.parentNode.insertBefore(successElement, errorElement);
+        
+        // Auto-remove after 3 seconds
+        setTimeout(() => {
+            if (successElement.parentNode) {
+                successElement.remove();
+            }
+        }, 3000);
+    }
+    
+    playCaptureSound() {
+        // Try to play a simple beep sound using Web Audio API
+        try {
+            const AudioContextClass = window.AudioContext || window['webkitAudioContext'];
+            if (AudioContextClass) {
+                const audioContext = new AudioContextClass();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+                oscillator.type = 'sine';
+                
+                gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.1);
+            }
+        } catch (error) {
+            console.log('Audio feedback not available:', error);
+        }
+    }
+
+    // Optimize image for OCR processing by resizing and compressing
+    async optimizeImageForOCR(blob) {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            img.onload = () => {
+                // Calculate optimal dimensions for OCR (max 800x600, maintain aspect ratio)
+                const maxWidth = 800;
+                const maxHeight = 600;
+                let { width, height } = img;
+                
+                // Calculate scaling factor
+                const scaleX = maxWidth / width;
+                const scaleY = maxHeight / height;
+                const scale = Math.min(scaleX, scaleY, 1); // Don't upscale
+                
+                // Set optimized dimensions
+                const newWidth = Math.floor(width * scale);
+                const newHeight = Math.floor(height * scale);
+                
+                canvas.width = newWidth;
+                canvas.height = newHeight;
+                
+                // Use high-quality scaling for better OCR results
+                ctx.imageSmoothingEnabled = true;
+                ctx.imageSmoothingQuality = 'high';
+                
+                // Draw resized image
+                ctx.drawImage(img, 0, 0, newWidth, newHeight);
+                
+                // Convert to optimized blob with higher compression for OCR
+                canvas.toBlob((optimizedBlob) => {
+                    if (optimizedBlob) {
+                        // Create file with proper name and type
+                        const optimizedFile = new File(
+                            [optimizedBlob], 
+                            'optimized-insurance-card.jpg', 
+                            { type: 'image/jpeg' }
+                        );
+                        
+                        console.log(`Image optimized: ${Math.round(blob.size/1024)}KB → ${Math.round(optimizedBlob.size/1024)}KB`);
+                        resolve(optimizedFile);
+                    } else {
+                        reject(new Error('Failed to create optimized image'));
+                    }
+                }, 'image/jpeg', 0.6); // Higher compression for OCR
+            };
+            
+            img.onerror = () => reject(new Error('Failed to load image for optimization'));
+            img.src = URL.createObjectURL(blob);
+        });
+    }
+    
+    // Validate image before OCR processing
+    validateImageForOCR(file) {
+        // Check file size (max 1MB)
+        if (file.size > 1024 * 1024) {
+            throw new Error('Image file is too large. Please try with a smaller image.');
+        }
+        
+        // Check minimum size (too small images don't OCR well)
+        if (file.size < 10 * 1024) {
+            throw new Error('Image file is too small. Please ensure the card is clearly visible.');
+        }
+        
+        // Check file type
+        if (!file.type.startsWith('image/')) {
+            throw new Error('Invalid file type. Please use an image file.');
+        }
+        
+        return true;
+    }
+
+    // Security enhancement: Generate checksum to prevent data tampering
+    generateChecksum(data, timestamp) {
+        const dataString = JSON.stringify(data) + timestamp.toString();
+        let hash = 0;
+        if (dataString.length === 0) return hash;
+        for (let i = 0; i < dataString.length; i++) {
+            const char = dataString.charCodeAt(i);
+            hash = ((hash << 5) - hash) + char;
+            hash = hash & hash; // Convert to 32-bit integer
+        }
+        return Math.abs(hash).toString(16);
     }
 }
 

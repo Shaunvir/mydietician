@@ -829,29 +829,31 @@
             alert(`Viewing profile for ${dietitianName}. This would show detailed profile information.`);
         }
 
-        // Access control - check insurance validation before showing results
+        // Access control - check insurance validation before showing results - MANDATORY SCANNING
         function checkAccessAuthorization() {
             const accessStatus = sessionStorage.getItem('accessAuthorized');
             const validationStatus = sessionStorage.getItem('insuranceValidated');
             const scannedData = sessionStorage.getItem('scannedInsuranceData');
             
-            console.log('=== ACCESS CONTROL CHECK ===');
+            console.log('=== ACCESS CONTROL CHECK (MANDATORY SCANNING) ===');
             console.log('Access Status:', accessStatus);
             console.log('Validation Status:', validationStatus);
             console.log('Has Scanned Data:', !!scannedData);
             
-            // Allow access if user has been authorized
-            if (accessStatus === 'true' || accessStatus === 'partial' || accessStatus === 'manual') {
-                console.log('Access granted:', accessStatus);
+            // MANDATORY SCANNING - Only allow access with scanned card data
+            if ((accessStatus === 'true' || accessStatus === 'partial') && 
+                (validationStatus === 'true' || validationStatus === 'partial') && 
+                scannedData) {
+                console.log('Access granted with scanned data:', accessStatus);
                 
                 // Show validation status message
                 showAccessMessage(accessStatus, validationStatus);
                 return true;
             }
             
-            // Block access if no authorization
-            console.log('Access denied - redirecting to search');
-            blockAccess();
+            // Block access for manual-only entries or missing scanned data
+            console.log('Access denied - scanned insurance card required');
+            blockAccess('mandatory_scan');
             return false;
         }
         
@@ -901,7 +903,7 @@
             }, 5000);
         }
         
-        function blockAccess() {
+        function blockAccess(reason = 'default') {
             // Clear the body content
             document.body.innerHTML = `
                 <div style="
@@ -936,8 +938,10 @@
                             line-height: 1.6;
                             margin-bottom: 32px;
                         ">
-                            Insurance verification is required to view dietitian results. 
-                            Please complete the search form with valid insurance information.
+                            ${reason === 'mandatory_scan' ? 
+                                'Insurance card scanning is <strong>required</strong> to view dietitian results. Please scan your physical insurance card to continue.' : 
+                                'Insurance verification is required to view dietitian results. Please complete the search form with valid insurance information.'
+                            }
                         </p>
                         <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
                             <a href="search.html" style="
