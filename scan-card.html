@@ -250,6 +250,33 @@
             color: #374151;
         }
 
+        /* Mobile mode specific styles */
+        .mobile-mode .scanner-container {
+            border-color: #3b82f6;
+            border-top-color: #3b82f6;
+        }
+
+        .mobile-mode .scanner-title {
+            color: #3b82f6;
+        }
+
+        .mobile-mode .scanner-subtitle {
+            color: #3b82f6;
+        }
+
+        #mobileIndicator {
+            animation: pulse-glow 2s infinite;
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% {
+                box-shadow: 0 0 5px rgba(59, 130, 246, 0.5);
+            }
+            50% {
+                box-shadow: 0 0 20px rgba(59, 130, 246, 0.8);
+            }
+        }
+
         @media (max-width: 640px) {
             .scanner-container {
                 padding: 24px 20px;
@@ -335,5 +362,26 @@
     </div>
 
     <script src="js/card-scanner.js"></script>
+    
+    <script>
+        // Apply mobile mode styling if detected
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const mode = urlParams.get('mode');
+            
+            if (mode === 'mobile') {
+                document.body.classList.add('mobile-mode');
+                
+                // Update back link for mobile mode
+                const backLink = document.querySelector('.back-link');
+                if (backLink) {
+                    backLink.textContent = '📱 Mobile Scanning Mode';
+                    backLink.style.pointerEvents = 'none';
+                    backLink.style.color = '#3b82f6';
+                    backLink.style.fontWeight = '600';
+                }
+            }
+        });
+    </script>
 </body>
 </html>

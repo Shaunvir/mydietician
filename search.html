@@ -4,6 +4,52 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Find a Dietitian - MyDietitian</title>
+    
+    <!-- Load external libraries first with multiple fallbacks -->
+    <script>
+        // QRCode library loader with multiple fallbacks
+        (function() {
+            let attempts = 0;
+            const qrLibraries = [
+                'https://unpkg.com/qrcode/build/qrcode.min.js',
+                'https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js',
+                'https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js'
+            ];
+            
+            function loadQRLibrary(index) {
+                if (index >= qrLibraries.length) {
+                    console.error('All QR code library CDNs failed');
+                    window.qrCodeLibraryFailed = true;
+                    return;
+                }
+                
+                const script = document.createElement('script');
+                script.src = qrLibraries[index];
+                script.onload = function() {
+                    console.log('QR code library loaded from:', qrLibraries[index]);
+                    window.qrCodeLibraryLoaded = true;
+                    
+                    // Set which library type we loaded
+                    if (typeof QRCode !== 'undefined') {
+                        window.qrLibraryType = 'qrcode';
+                    } else if (typeof QRious !== 'undefined') {
+                        window.qrLibraryType = 'qrious';
+                    }
+                };
+                script.onerror = function() {
+                    console.warn('Failed to load QR library from:', qrLibraries[index]);
+                    loadQRLibrary(index + 1);
+                };
+                document.head.appendChild(script);
+            }
+            
+            loadQRLibrary(0);
+        })();
+    </script>
+    
+    <script src="https://webrtc.github.io/adapter/adapter-latest.js" 
+            onerror="console.warn('WebRTC adapter failed to load, using native APIs')"></script>
+    
     <style>
         * {
             margin: 0;
@@ -301,6 +347,116 @@
             margin-top: 8px;
         }
 
+        /* Cross-device scanning styles */
+        .scan-options {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .scan-with-phone {
+            background: #7c3aed !important;
+            border: none;
+            font-size: 14px;
+        }
+
+        .scan-with-phone:hover {
+            background: #6d28d9 !important;
+        }
+
+        .qr-section {
+            margin-top: 24px;
+            padding: 20px;
+            background: #f8fafc;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .qr-instructions p {
+            margin-bottom: 16px;
+            color: #374151;
+            font-size: 14px;
+        }
+
+        .qr-code-container {
+            background: white;
+            padding: 16px;
+            border-radius: 8px;
+            display: inline-block;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .qr-help {
+            font-size: 12px;
+            color: #6b7280;
+            margin-bottom: 8px !important;
+        }
+
+        .qr-url {
+            width: 100%;
+            max-width: 300px;
+            padding: 8px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 12px;
+            margin-bottom: 12px;
+            font-family: monospace;
+        }
+
+        .btn-copy, .btn-cancel {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 0 4px;
+        }
+
+        .btn-copy {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .btn-copy:hover {
+            background: #2563eb;
+        }
+
+        .btn-cancel {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-cancel:hover {
+            background: #dc2626;
+        }
+
+        .qr-status {
+            font-size: 13px;
+            margin: 12px 0;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-weight: 500;
+        }
+
+        .qr-status.waiting {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        .qr-status.connected {
+            background: #d1fae5;
+            color: #059669;
+        }
+
+        .qr-status.error {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
         /* Scanned Data Indicators */
         .scanned-field {
             position: relative;
@@ -395,10 +551,30 @@
         <div class="scan-card-section mandatory">
             <h3 class="scan-card-title">📋 Required Step</h3>
             <p class="scan-card-subtitle">You must scan your insurance card to continue. This ensures accurate coverage verification.</p>
-            <a href="scan-card.html" class="scan-card-button required">
-                📷 Scan Insurance Card (Required)
-            </a>
+            <div class="scan-options">
+                <a href="scan-card.html" class="scan-card-button required">
+                    📷 Scan on This Device
+                </a>
+                <button class="scan-card-button scan-with-phone" id="scanWithPhone">
+                    📱 Scan with Phone
+                </button>
+            </div>
             <p class="scan-requirement-note">⚠️ Form submission requires a scanned insurance card</p>
+            
+            <!-- Cross-device QR code section -->
+            <div class="qr-section" id="qrSection" style="display: none;">
+                <div class="qr-instructions">
+                    <p><strong>📱 Scan this QR code with your phone:</strong></p>
+                    <div class="qr-code-container">
+                        <div id="qrcode"></div>
+                    </div>
+                    <p class="qr-help">Or manually enter this URL on your phone:</p>
+                    <input type="text" class="qr-url" id="qrUrl" readonly>
+                    <button class="btn-copy" id="copyUrl">📋 Copy</button>
+                    <p class="qr-status" id="qrStatus">Waiting for phone to connect...</p>
+                    <button class="btn-cancel" id="cancelQR">❌ Cancel</button>
+                </div>
+            </div>
         </div>
 
         <form id="searchForm" action="results.html" method="GET">
@@ -548,8 +724,8 @@
         // Initialization is now handled in the validateFormData section above
 
         function checkForScannedData() {
-            const scannedData = sessionStorage.getItem('scannedInsuranceData');
-            const validationStatus = sessionStorage.getItem('insuranceValidated');
+            const scannedData = storageManager.getItem('scannedInsuranceData');
+            const validationStatus = storageManager.getItem('insuranceValidated');
             const urlParams = new URLSearchParams(window.location.search);
             
             if (scannedData && (validationStatus === 'true' || validationStatus === 'partial')) {
@@ -990,6 +1166,829 @@
                 }
             });
         }
+    </script>
+    
+    <script>
+        // Storage utility with fallbacks
+        class StorageManager {
+            constructor() {
+                this.storage = this.getAvailableStorage();
+                this.memoryStorage = new Map();
+            }
+
+            getAvailableStorage() {
+                try {
+                    // Test sessionStorage availability
+                    const testKey = '__storage_test__';
+                    sessionStorage.setItem(testKey, 'test');
+                    sessionStorage.removeItem(testKey);
+                    return sessionStorage;
+                } catch (e) {
+                    console.warn('SessionStorage not available, using memory fallback:', e.message);
+                    return null;
+                }
+            }
+
+            setItem(key, value) {
+                try {
+                    if (this.storage) {
+                        this.storage.setItem(key, value);
+                    } else {
+                        this.memoryStorage.set(key, value);
+                    }
+                    return true;
+                } catch (e) {
+                    console.error('Storage setItem failed:', e);
+                    // Fallback to memory storage
+                    this.memoryStorage.set(key, value);
+                    return false;
+                }
+            }
+
+            getItem(key) {
+                try {
+                    if (this.storage) {
+                        return this.storage.getItem(key);
+                    } else {
+                        return this.memoryStorage.get(key) || null;
+                    }
+                } catch (e) {
+                    console.error('Storage getItem failed:', e);
+                    return this.memoryStorage.get(key) || null;
+                }
+            }
+
+            removeItem(key) {
+                try {
+                    if (this.storage) {
+                        this.storage.removeItem(key);
+                    }
+                    this.memoryStorage.delete(key);
+                } catch (e) {
+                    console.error('Storage removeItem failed:', e);
+                    this.memoryStorage.delete(key);
+                }
+            }
+
+            clear() {
+                try {
+                    if (this.storage) {
+                        // Only clear our keys, not all sessionStorage
+                        const keysToRemove = [];
+                        for (let i = 0; i < this.storage.length; i++) {
+                            const key = this.storage.key(i);
+                            if (key && (key.startsWith('offer_') || key.startsWith('answer_') || 
+                                       key.startsWith('ice_candidates_') || key.includes('insurance'))) {
+                                keysToRemove.push(key);
+                            }
+                        }
+                        keysToRemove.forEach(key => this.storage.removeItem(key));
+                    }
+                    this.memoryStorage.clear();
+                } catch (e) {
+                    console.error('Storage clear failed:', e);
+                    this.memoryStorage.clear();
+                }
+            }
+        }
+
+        // Global storage manager instance
+        const storageManager = new StorageManager();
+
+        // Cross-device scanning functionality
+        class CrossDeviceScanner {
+            constructor() {
+                this.peerConnection = null;
+                this.dataChannel = null;
+                this.sessionId = null;
+                this.isHost = false;
+                
+                this.initializeEventListeners();
+            }
+
+            initializeEventListeners() {
+                const scanWithPhoneBtn = document.getElementById('scanWithPhone');
+                const cancelQRBtn = document.getElementById('cancelQR');
+                const copyUrlBtn = document.getElementById('copyUrl');
+
+                if (scanWithPhoneBtn) {
+                    scanWithPhoneBtn.addEventListener('click', () => this.startCrossDeviceScanning());
+                }
+                
+                if (cancelQRBtn) {
+                    cancelQRBtn.addEventListener('click', () => this.cancelCrossDeviceScanning());
+                }
+                
+                if (copyUrlBtn) {
+                    copyUrlBtn.addEventListener('click', () => this.copyURL());
+                }
+            }
+
+            async startCrossDeviceScanning() {
+                try {
+                    // Verify QR library is available
+                    if (typeof QRCode === 'undefined' && typeof QRious === 'undefined') {
+                        throw new Error('QR Code library not loaded. Please check your internet connection and try again.');
+                    }
+
+                    this.sessionId = this.generateSessionId();
+                    this.isHost = true;
+                    
+                    // Show QR section
+                    document.getElementById('qrSection').style.display = 'block';
+                    
+                    // Generate mobile URL with proper protocol handling
+                    const protocol = window.location.protocol;
+                    const host = window.location.host;
+                    //const mobileUrl = `${protocol}//${host}/scan-card.html?session=${this.sessionId}&mode=mobile`;
+                    const mobileUrl = `https://my-dietitian.ca/scan-card.html?session=${this.sessionId}&mode=mobile`;
+                    document.getElementById('qrUrl').value = mobileUrl;
+                    
+                    // Update status while generating QR
+                    this.updateStatus('waiting', 'Generating QR code...');
+                    
+                    // Generate QR code with error handling
+                    const qrContainer = document.getElementById('qrcode');
+                    if (!qrContainer) {
+                        throw new Error('QR code container not found');
+                    }
+                    
+                    // Clear any existing QR code
+                    qrContainer.innerHTML = '';
+                    
+                    // Generate QR code based on available library
+                    try {
+                        await this.generateQRCode(qrContainer, mobileUrl);
+                        console.log('QR code generated successfully for URL:', mobileUrl);
+                        
+                        // Initialize WebRTC as host
+                        await this.initializeWebRTC();
+                        
+                        // Update status
+                        this.updateStatus('waiting', 'QR code ready - scan with your phone');
+                        
+                    } catch (qrError) {
+                        console.warn('QR code generation failed, falling back to manual setup:', qrError);
+                        
+                        // Fall back to manual setup when QR generation fails
+                        this.fallbackToManualSetup(qrContainer, mobileUrl);
+                        
+                        // Still initialize WebRTC for manual setup
+                        await this.initializeWebRTC();
+                    }
+                    
+                } catch (error) {
+                    console.error('Failed to start cross-device scanning:', error);
+                    
+                    // Provide specific error messages based on error type
+                    let errorMessage = 'Failed to initialize cross-device scanning.';
+                    if (error.message.includes('QR Code library') || error.message.includes('QR code generation')) {
+                        // Try manual setup as last resort
+                        try {
+                            const qrContainer = document.getElementById('qrcode');
+                            const mobileUrl = document.getElementById('qrUrl').value;
+                            this.fallbackToManualSetup(qrContainer, mobileUrl);
+                            await this.initializeWebRTC();
+                            return; // Successfully recovered
+                        } catch (fallbackError) {
+                            errorMessage = 'Unable to generate QR code. Please copy the URL manually and open it on your phone.';
+                        }
+                    } else if (error.message.includes('Canvas not supported')) {
+                        errorMessage = 'Your browser doesn\'t support QR code generation. Please copy the URL manually.';
+                    } else if (error.message.includes('WebRTC')) {
+                        errorMessage = 'Your browser doesn\'t support cross-device communication. Please use a modern browser.';
+                    }
+                    
+                    this.updateStatus('error', errorMessage);
+                    
+                    // Hide QR section on unrecoverable error
+                    setTimeout(() => {
+                        document.getElementById('qrSection').style.display = 'none';
+                    }, 8000);
+                }
+            }
+
+            async generateQRCode(container, url) {
+                try {
+                    // Check canvas support first
+                    if (!this.checkCanvasSupport()) {
+                        throw new Error('Canvas not supported in this browser');
+                    }
+
+                    // Try QRCode library first (node-qrcode)
+                    if (typeof QRCode !== 'undefined') {
+                        console.log('Using QRCode library for QR generation');
+                        
+                        // Use the Promise-based API that creates and returns a canvas
+                        const canvas = await QRCode.toCanvas(url, {
+                            width: 200,
+                            margin: 2,
+                            color: {
+                                dark: '#000000',
+                                light: '#FFFFFF'
+                            },
+                            errorCorrectionLevel: 'M'
+                        });
+                        
+                        // Validate canvas was created
+                        if (!canvas || !canvas.getContext) {
+                            throw new Error('Failed to create QR code canvas');
+                        }
+                        
+                        // Style the canvas for consistency
+                        canvas.style.display = 'block';
+                        canvas.style.margin = '0 auto';
+                        
+                        container.appendChild(canvas);
+                        console.log('QR code canvas created and appended successfully');
+                    }
+                    // Fallback to QRious library
+                    else if (typeof QRious !== 'undefined') {
+                        console.log('Using QRious library for QR generation');
+                        
+                        const canvas = document.createElement('canvas');
+                        
+                        // Validate canvas creation
+                        if (!canvas.getContext) {
+                            throw new Error('Failed to create canvas element');
+                        }
+                        
+                        const qr = new QRious({
+                            element: canvas,
+                            value: url,
+                            size: 200,
+                            background: 'white',
+                            foreground: 'black',
+                            level: 'M'
+                        });
+                        
+                        // Style the canvas for consistency
+                        canvas.style.display = 'block';
+                        canvas.style.margin = '0 auto';
+                        
+                        container.appendChild(canvas);
+                        console.log('QRious canvas created and appended successfully');
+                    }
+                    else {
+                        throw new Error('No QR code library available');
+                    }
+                } catch (error) {
+                    // Enhanced error diagnostics
+                    const diagnostics = this.diagnoseQRError(error);
+                    console.error('QR code generation failed:', {
+                        originalError: error,
+                        diagnostics: diagnostics,
+                        browserInfo: {
+                            userAgent: navigator.userAgent,
+                            canvasSupported: this.checkCanvasSupport(),
+                            qrCodeAvailable: typeof QRCode !== 'undefined',
+                            qriousAvailable: typeof QRious !== 'undefined'
+                        }
+                    });
+                    
+                    // Re-throw with enhanced context
+                    throw new Error(`QR code generation failed: ${diagnostics.userMessage} (${error.message})`);
+                }
+            }
+
+            checkCanvasSupport() {
+                try {
+                    const canvas = document.createElement('canvas');
+                    const context = canvas.getContext('2d');
+                    return !!(canvas && context);
+                } catch (e) {
+                    console.warn('Canvas support check failed:', e);
+                    return false;
+                }
+            }
+
+            diagnoseQRError(error) {
+                const errorMessage = error.message.toLowerCase();
+                let diagnosis = {
+                    category: 'unknown',
+                    cause: 'Unknown error',
+                    userMessage: 'An unexpected error occurred',
+                    suggestions: ['Try refreshing the page', 'Check your internet connection']
+                };
+
+                // Canvas-related errors
+                if (errorMessage.includes('getcontext') || errorMessage.includes('canvas')) {
+                    diagnosis = {
+                        category: 'canvas',
+                        cause: 'Canvas API issue',
+                        userMessage: 'Your browser cannot create the QR code image',
+                        suggestions: [
+                            'Try using a modern browser like Chrome, Firefox, or Safari',
+                            'Enable JavaScript if it\'s disabled',
+                            'Try refreshing the page'
+                        ]
+                    };
+                }
+                // QR library loading errors
+                else if (errorMessage.includes('qrcode') && errorMessage.includes('undefined')) {
+                    diagnosis = {
+                        category: 'library',
+                        cause: 'QR code library not loaded',
+                        userMessage: 'QR code generator failed to load',
+                        suggestions: [
+                            'Check your internet connection',
+                            'Disable ad blockers temporarily',
+                            'Try using manual setup instead'
+                        ]
+                    };
+                }
+                // Canvas creation failures
+                else if (errorMessage.includes('failed to create')) {
+                    diagnosis = {
+                        category: 'creation',
+                        cause: 'Canvas element creation failed',
+                        userMessage: 'Unable to create QR code display',
+                        suggestions: [
+                            'Your browser may not support canvas',
+                            'Try a different browser',
+                            'Use manual URL copy instead'
+                        ]
+                    };
+                }
+                // Network/loading errors
+                else if (errorMessage.includes('network') || errorMessage.includes('fetch')) {
+                    diagnosis = {
+                        category: 'network',
+                        cause: 'Network connectivity issue',
+                        userMessage: 'Cannot download QR code generator',
+                        suggestions: [
+                            'Check your internet connection',
+                            'Try again in a few seconds',
+                            'Use manual setup if problem persists'
+                        ]
+                    };
+                }
+                // Permission/security errors
+                else if (errorMessage.includes('permission') || errorMessage.includes('security')) {
+                    diagnosis = {
+                        category: 'security',
+                        cause: 'Browser security restriction',
+                        userMessage: 'Browser blocked QR code generation',
+                        suggestions: [
+                            'Allow JavaScript to run',
+                            'Disable strict security settings temporarily',
+                            'Try manual setup instead'
+                        ]
+                    };
+                }
+
+                return diagnosis;
+            }
+
+            fallbackToManualSetup(container, mobileUrl) {
+                console.log('Falling back to manual setup mode');
+                
+                // Create manual setup UI
+                container.innerHTML = `
+                    <div style="
+                        padding: 24px; 
+                        background: #fef3c7; 
+                        border: 2px solid #f59e0b; 
+                        border-radius: 12px; 
+                        text-align: center;
+                        box-shadow: 0 4px 12px rgba(245, 158, 11, 0.15);
+                    ">
+                        <div style="font-size: 20px; margin-bottom: 8px;">📱</div>
+                        <p style="
+                            margin: 0 0 12px 0; 
+                            color: #92400e; 
+                            font-size: 16px; 
+                            font-weight: 600;
+                        ">
+                            Manual Setup Required
+                        </p>
+                        <p style="
+                            margin: 0 0 16px 0; 
+                            color: #d97706; 
+                            font-size: 14px; 
+                            line-height: 1.4;
+                        ">
+                            QR code generation failed, but cross-device scanning still works!<br>
+                            Copy the URL below and open it on your phone.
+                        </p>
+                        <div style="
+                            background: white; 
+                            padding: 12px; 
+                            border-radius: 8px; 
+                            border: 1px solid #f59e0b;
+                            margin-bottom: 12px;
+                        ">
+                            <p style="
+                                margin: 0 0 8px 0; 
+                                color: #92400e; 
+                                font-size: 12px; 
+                                font-weight: 600;
+                            ">
+                                📋 Copy this URL:
+                            </p>
+                            <code style="
+                                display: block;
+                                background: #fffbeb;
+                                padding: 8px;
+                                border-radius: 4px;
+                                font-size: 11px;
+                                word-break: break-all;
+                                color: #92400e;
+                                border: 1px solid #fde68a;
+                            ">${mobileUrl}</code>
+                        </div>
+                        <p style="
+                            margin: 0; 
+                            color: #a16207; 
+                            font-size: 12px;
+                            font-style: italic;
+                        ">
+                            ✓ WebRTC connection will work the same way
+                        </p>
+                    </div>
+                `;
+                
+                // Update status to manual setup
+                this.updateStatus('waiting', '📋 Copy the URL above and open it on your phone');
+                
+                // Make sure the URL field is populated and visible
+                const urlField = document.getElementById('qrUrl');
+                if (urlField) {
+                    urlField.value = mobileUrl;
+                    urlField.style.display = 'block';
+                }
+            }
+
+            async initializeWebRTC() {
+                try {
+                    // Check WebRTC support
+                    if (typeof RTCPeerConnection === 'undefined') {
+                        throw new Error('WebRTC not supported in this browser');
+                    }
+
+                    // Create peer connection with multiple STUN servers for reliability
+                    this.peerConnection = new RTCPeerConnection({
+                        iceServers: [
+                            { urls: 'stun:stun.l.google.com:19302' },
+                            { urls: 'stun:stun1.l.google.com:19302' },
+                            { urls: 'stun:stun2.l.google.com:19302' },
+                            { urls: 'stun:stun.cloudflare.com:3478' }
+                        ],
+                        iceCandidatePoolSize: 10
+                    });
+
+                    if (this.isHost) {
+                        // Host creates data channel
+                        this.dataChannel = this.peerConnection.createDataChannel('insuranceData', {
+                            ordered: true
+                        });
+                        
+                        this.dataChannel.onopen = () => {
+                            console.log('Data channel opened');
+                            this.updateStatus('connected', '📱 Phone connected! Scan your card now.');
+                        };
+                        
+                        this.dataChannel.onmessage = (event) => {
+                            this.handleReceivedData(JSON.parse(event.data));
+                        };
+                        
+                        // Create offer
+                        const offer = await this.peerConnection.createOffer();
+                        await this.peerConnection.setLocalDescription(offer);
+                        
+                        // Store offer for mobile device to retrieve
+                        storageManager.setItem(`offer_${this.sessionId}`, JSON.stringify({
+                            offer: offer,
+                            timestamp: Date.now()
+                        }));
+                        
+                        // Handle ICE candidates
+                        this.peerConnection.onicecandidate = (event) => {
+                            if (event.candidate) {
+                                this.storeIceCandidate(event.candidate, 'host');
+                            }
+                        };
+                        
+                        // Start polling for mobile connection
+                        this.pollForMobileConnection();
+                    }
+                    
+                } catch (error) {
+                    console.error('WebRTC initialization failed:', error);
+                    this.updateStatus('error', 'Connection failed. Please try again.');
+                }
+            }
+
+            async pollForMobileConnection() {
+                const pollInterval = setInterval(async () => {
+                    try {
+                        // Check for answer from mobile
+                        const answerData = storageManager.getItem(`answer_${this.sessionId}`);
+                        if (answerData) {
+                            const { answer } = JSON.parse(answerData);
+                            await this.peerConnection.setRemoteDescription(answer);
+                            
+                            // Check for ICE candidates from mobile
+                            this.checkForRemoteIceCandidates();
+                            
+                            clearInterval(pollInterval);
+                            storageManager.removeItem(`answer_${this.sessionId}`);
+                        }
+                    } catch (error) {
+                        console.error('Error polling for mobile connection:', error);
+                    }
+                }, 1000);
+                
+                // Timeout after 5 minutes
+                setTimeout(() => {
+                    clearInterval(pollInterval);
+                    if (this.peerConnection && this.peerConnection.connectionState !== 'connected') {
+                        this.updateStatus('error', 'Connection timeout. Please try again.');
+                    }
+                }, 300000);
+            }
+
+            checkForRemoteIceCandidates() {
+                const candidateInterval = setInterval(() => {
+                    const candidates = storageManager.getItem(`ice_candidates_mobile_${this.sessionId}`);
+                    if (candidates) {
+                        const candidateList = JSON.parse(candidates);
+                        candidateList.forEach(async (candidate) => {
+                            try {
+                                await this.peerConnection.addIceCandidate(candidate);
+                            } catch (error) {
+                                console.error('Error adding ICE candidate:', error);
+                            }
+                        });
+                        storageManager.removeItem(`ice_candidates_mobile_${this.sessionId}`);
+                        clearInterval(candidateInterval);
+                    }
+                }, 1000);
+                
+                // Stop checking after 30 seconds
+                setTimeout(() => clearInterval(candidateInterval), 30000);
+            }
+
+            storeIceCandidate(candidate, role) {
+                const key = `ice_candidates_${role}_${this.sessionId}`;
+                const existing = storageManager.getItem(key);
+                const candidates = existing ? JSON.parse(existing) : [];
+                candidates.push(candidate);
+                storageManager.setItem(key, JSON.stringify(candidates));
+            }
+
+            handleReceivedData(data) {
+                console.log('Received insurance data from mobile:', data);
+                
+                // Store the received data using existing logic
+                const timestamp = Date.now();
+                const dataWithSecurity = {
+                    ...data,
+                    _timestamp: timestamp,
+                    _verified: true,
+                    _checksum: this.generateChecksum(data, timestamp)
+                };
+
+                storageManager.setItem('scannedInsuranceData', JSON.stringify(dataWithSecurity));
+                storageManager.setItem('insuranceValidated', 'true');
+                storageManager.setItem('_scanTimestamp', timestamp.toString());
+
+                // Update UI to show success
+                this.updateStatus('connected', '✅ Insurance data received successfully!');
+                
+                // Hide QR section and show completion
+                setTimeout(() => {
+                    this.cancelCrossDeviceScanning();
+                    // Refresh page to show scanned data
+                    window.location.href = 'search.html?scanned=true';
+                }, 2000);
+            }
+
+            generateChecksum(data, timestamp) {
+                const dataString = JSON.stringify(data) + timestamp.toString();
+                let hash = 0;
+                if (dataString.length === 0) return hash;
+                for (let i = 0; i < dataString.length; i++) {
+                    const char = dataString.charCodeAt(i);
+                    hash = ((hash << 5) - hash) + char;
+                    hash = hash & hash;
+                }
+                return Math.abs(hash).toString(16);
+            }
+
+            generateSessionId() {
+                return Math.random().toString(36).substring(2, 8).toUpperCase();
+            }
+
+            updateStatus(type, message) {
+                const statusElement = document.getElementById('qrStatus');
+                statusElement.textContent = message;
+                statusElement.className = `qr-status ${type}`;
+            }
+
+            copyURL() {
+                const urlField = document.getElementById('qrUrl');
+                urlField.select();
+                urlField.setSelectionRange(0, 99999);
+                document.execCommand('copy');
+                
+                const copyBtn = document.getElementById('copyUrl');
+                const originalText = copyBtn.textContent;
+                copyBtn.textContent = '✅ Copied!';
+                setTimeout(() => {
+                    copyBtn.textContent = originalText;
+                }, 2000);
+            }
+
+            cancelCrossDeviceScanning() {
+                // Close peer connection
+                if (this.peerConnection) {
+                    this.peerConnection.close();
+                    this.peerConnection = null;
+                }
+                
+                // Clear session data
+                if (this.sessionId) {
+                    storageManager.removeItem(`offer_${this.sessionId}`);
+                    storageManager.removeItem(`answer_${this.sessionId}`);
+                    storageManager.removeItem(`ice_candidates_host_${this.sessionId}`);
+                    storageManager.removeItem(`ice_candidates_mobile_${this.sessionId}`);
+                }
+                
+                // Hide QR section
+                document.getElementById('qrSection').style.display = 'none';
+                
+                // Reset state
+                this.sessionId = null;
+                this.isHost = false;
+                this.dataChannel = null;
+            }
+        }
+
+        // Library loading detection and initialization
+        let librariesLoaded = {
+            qrcode: false,
+            webrtc: true // Default to true since adapter is optional
+        };
+
+        function checkBrowserCompatibility() {
+            const compatibility = {
+                webrtc: typeof RTCPeerConnection !== 'undefined',
+                getUserMedia: navigator.mediaDevices && typeof navigator.mediaDevices.getUserMedia === 'function',
+                canvas: typeof HTMLCanvasElement !== 'undefined',
+                sessionStorage: typeof Storage !== 'undefined',
+                fetch: typeof fetch !== 'undefined'
+            };
+            
+            console.log('Browser compatibility:', compatibility);
+            return compatibility;
+        }
+
+        function checkLibraryAvailability() {
+            // Check if QR library failed to load from all CDNs
+            if (window.qrCodeLibraryFailed) {
+                librariesLoaded.qrcode = false;
+            } else {
+                librariesLoaded.qrcode = (typeof QRCode !== 'undefined' || typeof QRious !== 'undefined') || window.qrCodeLibraryLoaded;
+            }
+            
+            librariesLoaded.webrtc = typeof RTCPeerConnection !== 'undefined';
+            
+            console.log('Library availability:', librariesLoaded);
+            console.log('QRCode object available:', typeof QRCode !== 'undefined');
+            console.log('QRious object available:', typeof QRious !== 'undefined');
+            console.log('Library type:', window.qrLibraryType);
+            console.log('QRCode library loaded flag:', window.qrCodeLibraryLoaded);
+            console.log('QRCode library failed flag:', window.qrCodeLibraryFailed);
+            
+            return librariesLoaded.qrcode && librariesLoaded.webrtc;
+        }
+
+        function initializeCrossDeviceScanner() {
+            // Check browser compatibility first
+            const compatibility = checkBrowserCompatibility();
+            if (!compatibility.webrtc || !compatibility.getUserMedia || !compatibility.canvas) {
+                console.warn('Browser compatibility issues detected:', compatibility);
+                showBrowserCompatibilityError(compatibility);
+                return;
+            }
+
+            // Try multiple times with increasing delays to wait for async library loading
+            let attempts = 0;
+            const maxAttempts = 6; // Try for up to 12 seconds
+            
+            function tryInitialize() {
+                attempts++;
+                console.log(`Initialization attempt ${attempts}/${maxAttempts}`);
+                
+                if (checkLibraryAvailability()) {
+                    console.log('Libraries available, initializing CrossDeviceScanner');
+                    new CrossDeviceScanner();
+                    return;
+                }
+                
+                if (window.qrCodeLibraryFailed) {
+                    console.error('QR Code library failed to load from all CDNs');
+                    showLibraryError();
+                    return;
+                }
+                
+                if (attempts < maxAttempts) {
+                    console.log(`Retrying in ${attempts * 500}ms...`);
+                    setTimeout(tryInitialize, attempts * 500); // Exponential backoff
+                } else {
+                    console.error('Required libraries failed to load after all attempts');
+                    showLibraryError();
+                }
+            }
+            
+            tryInitialize();
+        }
+
+        function showBrowserCompatibilityError(compatibility) {
+            const scanWithPhoneBtn = document.getElementById('scanWithPhone');
+            if (scanWithPhoneBtn) {
+                scanWithPhoneBtn.disabled = true;
+                
+                let message = '📱 Unavailable';
+                let tooltip = 'Cross-device scanning not supported: ';
+                
+                if (!compatibility.webrtc) {
+                    tooltip += 'WebRTC not supported. ';
+                }
+                if (!compatibility.getUserMedia) {
+                    tooltip += 'Camera access not supported. ';
+                }
+                if (!compatibility.canvas) {
+                    tooltip += 'Canvas not supported. ';
+                }
+                
+                tooltip += 'Please use a modern browser like Chrome, Firefox, or Safari.';
+                
+                scanWithPhoneBtn.textContent = message;
+                scanWithPhoneBtn.style.opacity = '0.5';
+                scanWithPhoneBtn.title = tooltip;
+            }
+        }
+
+        function showLibraryError() {
+            const scanWithPhoneBtn = document.getElementById('scanWithPhone');
+            if (scanWithPhoneBtn) {
+                // Instead of completely disabling, offer manual URL option
+                scanWithPhoneBtn.textContent = '📱 Manual Setup';
+                scanWithPhoneBtn.title = 'QR library unavailable - click to show manual URL';
+                
+                // Change click handler to show manual URL
+                scanWithPhoneBtn.onclick = function() {
+                    showManualCrossDeviceSetup();
+                };
+            }
+        }
+
+        function showManualCrossDeviceSetup() {
+            // Generate session ID
+            const sessionId = Math.random().toString(36).substring(2, 8).toUpperCase();
+            
+            // Show QR section with manual instructions
+            document.getElementById('qrSection').style.display = 'block';
+            
+            // Generate mobile URL
+            const protocol = window.location.protocol;
+            const host = window.location.host;
+            const mobileUrl = `${protocol}//${host}/scan-card.html?session=${sessionId}&mode=mobile`;
+            document.getElementById('qrUrl').value = mobileUrl;
+            
+            // Update QR container with manual instructions
+            const qrContainer = document.getElementById('qrcode');
+            qrContainer.innerHTML = `
+                <div style="padding: 20px; background: #f9fafb; border: 2px dashed #d1d5db; border-radius: 8px; text-align: center;">
+                    <p style="margin: 0 0 10px 0; color: #6b7280; font-size: 14px;">
+                        📱 <strong>Manual Setup:</strong><br>
+                        Copy the URL below and open it on your phone
+                    </p>
+                    <p style="margin: 0; color: #374151; font-size: 12px;">
+                        QR code unavailable due to network restrictions
+                    </p>
+                </div>
+            `;
+            
+            // Update status
+            const statusElement = document.getElementById('qrStatus');
+            statusElement.textContent = '📋 Copy the URL below and open it on your phone';
+            statusElement.className = 'qr-status waiting';
+            
+            // Initialize WebRTC for manual setup
+            const scanner = new CrossDeviceScanner();
+            scanner.sessionId = sessionId;
+            scanner.isHost = true;
+            scanner.initializeWebRTC();
+        }
+
+        // Initialize when DOM is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            // Give libraries time to load, then initialize
+            setTimeout(initializeCrossDeviceScanner, 500);
+        });
     </script>
 </body>
 </html>

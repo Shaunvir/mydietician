@@ -1,3 +1,66 @@
+// Storage utility for cross-device compatibility
+class StorageManager {
+    constructor() {
+        this.storage = this.getAvailableStorage();
+        this.memoryStorage = new Map();
+    }
+
+    getAvailableStorage() {
+        try {
+            const testKey = '__storage_test__';
+            sessionStorage.setItem(testKey, 'test');
+            sessionStorage.removeItem(testKey);
+            return sessionStorage;
+        } catch (e) {
+            console.warn('SessionStorage not available, using memory fallback:', e.message);
+            return null;
+        }
+    }
+
+    setItem(key, value) {
+        try {
+            if (this.storage) {
+                this.storage.setItem(key, value);
+            } else {
+                this.memoryStorage.set(key, value);
+            }
+            return true;
+        } catch (e) {
+            console.error('Storage setItem failed:', e);
+            this.memoryStorage.set(key, value);
+            return false;
+        }
+    }
+
+    getItem(key) {
+        try {
+            if (this.storage) {
+                return this.storage.getItem(key);
+            } else {
+                return this.memoryStorage.get(key) || null;
+            }
+        } catch (e) {
+            console.error('Storage getItem failed:', e);
+            return this.memoryStorage.get(key) || null;
+        }
+    }
+
+    removeItem(key) {
+        try {
+            if (this.storage) {
+                this.storage.removeItem(key);
+            }
+            this.memoryStorage.delete(key);
+        } catch (e) {
+            console.error('Storage removeItem failed:', e);
+            this.memoryStorage.delete(key);
+        }
+    }
+}
+
+// Global storage manager instance
+const storageManager = new StorageManager();
+
 class InsuranceCardScanner {
     constructor() {
         this.OCR_API_KEY = 'K83328912888957';
@@ -7,7 +70,224 @@ class InsuranceCardScanner {
         this.context = this.canvas.getContext('2d');
         this.extractedData = null;
         
+        // Cross-device functionality
+        this.isMobileMode = false;
+        this.sessionId = null;
+        this.peerConnection = null;
+        this.dataChannel = null;
+        
+        this.checkForCrossDeviceMode();
         this.initializeEventListeners();
+    }
+
+    checkForCrossDeviceMode() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const mode = urlParams.get('mode');
+        const sessionId = urlParams.get('session');
+        
+        if (mode === 'mobile' && sessionId) {
+            this.isMobileMode = true;
+            this.sessionId = sessionId;
+            console.log('Mobile cross-device mode activated for session:', sessionId);
+            
+            // Initialize mobile WebRTC connection
+            setTimeout(() => this.initializeMobileWebRTC(), 1000);
+            
+            // Update UI to show mobile mode
+            this.updateUIForMobileMode();
+        }
+    }
+
+    updateUIForMobileMode() {
+        // Update header to indicate mobile mode
+        const title = document.querySelector('.scanner-title');
+        const subtitle = document.querySelector('.scanner-subtitle');
+        
+        if (title) {
+            title.textContent = '📱 Phone Scanning Mode';
+        }
+        if (subtitle) {
+            subtitle.textContent = 'Scan your insurance card - data will be sent to your desktop';
+        }
+        
+        // Add mobile indicator
+        const scannerContainer = document.querySelector('.scanner-container');
+        if (scannerContainer && !document.getElementById('mobileIndicator')) {
+            const indicator = document.createElement('div');
+            indicator.id = 'mobileIndicator';
+            indicator.style.cssText = `
+                background: #3b82f6;
+                color: white;
+                padding: 8px 16px;
+                border-radius: 6px;
+                margin-bottom: 16px;
+                text-align: center;
+                font-size: 14px;
+                font-weight: 600;
+            `;
+            indicator.textContent = '📡 Connected to desktop - ready to scan';
+            scannerContainer.insertBefore(indicator, scannerContainer.firstChild);
+        }
+    }
+
+    async initializeMobileWebRTC() {
+        try {
+            console.log('Initializing mobile WebRTC connection...');
+            
+            // Check WebRTC support first
+            if (typeof RTCPeerConnection === 'undefined') {
+                throw new Error('WebRTC not supported in this browser');
+            }
+            
+            // Get the offer from session storage (stored by desktop)
+            const offerData = storageManager.getItem(`offer_${this.sessionId}`);
+            if (!offerData) {
+                console.error('No offer found for session:', this.sessionId);
+                this.showError('Failed to connect to desktop. Please try scanning the QR code again.');
+                return;
+            }
+            
+            const { offer } = JSON.parse(offerData);
+            if (!offer || !offer.type || !offer.sdp) {
+                throw new Error('Invalid offer data received');
+            }
+            
+            // Create peer connection with multiple STUN servers for reliability
+            this.peerConnection = new RTCPeerConnection({
+                iceServers: [
+                    { urls: 'stun:stun.l.google.com:19302' },
+                    { urls: 'stun:stun1.l.google.com:19302' },
+                    { urls: 'stun:stun2.l.google.com:19302' },
+                    { urls: 'stun:stun.cloudflare.com:3478' }
+                ],
+                iceCandidatePoolSize: 10
+            });
+            
+            // Monitor connection state
+            this.peerConnection.onconnectionstatechange = () => {
+                console.log('Connection state:', this.peerConnection.connectionState);
+                switch (this.peerConnection.connectionState) {
+                    case 'connected':
+                        this.updateMobileStatus('connected', '📡 Connected to desktop');
+                        break;
+                    case 'disconnected':
+                        this.updateMobileStatus('error', '⚠️ Connection lost');
+                        break;
+                    case 'failed':
+                        this.updateMobileStatus('error', '❌ Connection failed');
+                        this.showError('Connection to desktop failed. Please try again.');
+                        break;
+                }
+            };
+
+            // Handle data channel from desktop
+            this.peerConnection.ondatachannel = (event) => {
+                this.dataChannel = event.channel;
+                this.dataChannel.onopen = () => {
+                    console.log('Mobile data channel opened');
+                    this.updateMobileStatus('connected', '📡 Connected to desktop - ready to scan');
+                };
+                this.dataChannel.onclose = () => {
+                    console.log('Mobile data channel closed');
+                    this.updateMobileStatus('error', '📡 Connection closed');
+                };
+                this.dataChannel.onerror = (error) => {
+                    console.error('Data channel error:', error);
+                    this.updateMobileStatus('error', '❌ Data channel error');
+                };
+            };
+            
+            // Handle ICE candidates
+            this.peerConnection.onicecandidate = (event) => {
+                if (event.candidate) {
+                    this.storeIceCandidate(event.candidate, 'mobile');
+                }
+            };
+            
+            // Set remote description (offer) and create answer
+            await this.peerConnection.setRemoteDescription(offer);
+            const answer = await this.peerConnection.createAnswer();
+            await this.peerConnection.setLocalDescription(answer);
+            
+            // Store answer for desktop to retrieve
+            storageManager.setItem(`answer_${this.sessionId}`, JSON.stringify({
+                answer: answer,
+                timestamp: Date.now()
+            }));
+            
+            // Get any ICE candidates from desktop
+            this.checkForRemoteIceCandidates();
+            
+            console.log('Mobile WebRTC connection initialized');
+            
+            // Set connection timeout
+            setTimeout(() => {
+                if (this.peerConnection && this.peerConnection.connectionState !== 'connected') {
+                    console.warn('WebRTC connection timeout');
+                    this.updateMobileStatus('error', '⏱️ Connection timeout');
+                    this.showError('Connection to desktop timed out. Please try scanning the QR code again.');
+                }
+            }, 30000); // 30 second timeout
+            
+        } catch (error) {
+            console.error('Failed to initialize mobile WebRTC:', error);
+            
+            // Provide specific error messages
+            let errorMessage = 'Failed to connect to desktop.';
+            if (error.message.includes('WebRTC not supported')) {
+                errorMessage = 'Your browser doesn\'t support cross-device communication. Please use a modern browser like Chrome, Firefox, or Safari.';
+            } else if (error.message.includes('Invalid offer')) {
+                errorMessage = 'Invalid connection data. Please scan the QR code again.';
+            } else if (error.message.includes('network')) {
+                errorMessage = 'Network connection issue. Please check your internet connection and try again.';
+            }
+            
+            this.updateMobileStatus('error', '❌ Connection failed');
+            this.showError(errorMessage);
+        }
+    }
+
+    checkForRemoteIceCandidates() {
+        const candidateInterval = setInterval(() => {
+            const candidates = storageManager.getItem(`ice_candidates_host_${this.sessionId}`);
+            if (candidates) {
+                const candidateList = JSON.parse(candidates);
+                candidateList.forEach(async (candidate) => {
+                    try {
+                        await this.peerConnection.addIceCandidate(candidate);
+                    } catch (error) {
+                        console.error('Error adding ICE candidate:', error);
+                    }
+                });
+                storageManager.removeItem(`ice_candidates_host_${this.sessionId}`);
+                clearInterval(candidateInterval);
+            }
+        }, 1000);
+        
+        // Stop checking after 30 seconds
+        setTimeout(() => clearInterval(candidateInterval), 30000);
+    }
+
+    storeIceCandidate(candidate, role) {
+        const key = `ice_candidates_${role}_${this.sessionId}`;
+        const existing = storageManager.getItem(key);
+        const candidates = existing ? JSON.parse(existing) : [];
+        candidates.push(candidate);
+        storageManager.setItem(key, JSON.stringify(candidates));
+    }
+
+    updateMobileStatus(type, message) {
+        const indicator = document.getElementById('mobileIndicator');
+        if (indicator) {
+            indicator.textContent = message;
+            if (type === 'connected') {
+                indicator.style.background = '#10b981';
+            } else if (type === 'sending') {
+                indicator.style.background = '#f59e0b';
+            } else if (type === 'error') {
+                indicator.style.background = '#ef4444';
+            }
+        }
     }
 
     initializeEventListeners() {
@@ -576,7 +856,13 @@ class InsuranceCardScanner {
             return;
         }
 
-        // Add security enhancements to prevent tampering
+        // Check if we're in mobile mode - send data via WebRTC
+        if (this.isMobileMode && this.dataChannel && this.dataChannel.readyState === 'open') {
+            this.sendDataToDesktop();
+            return;
+        }
+
+        // Normal desktop mode - store locally and redirect
         const timestamp = Date.now();
         const dataWithSecurity = {
             ...this.extractedData,
@@ -594,13 +880,55 @@ class InsuranceCardScanner {
         window.location.href = 'search.html?scanned=true';
     }
 
+    sendDataToDesktop() {
+        try {
+            console.log('Sending insurance data to desktop...', this.extractedData);
+            this.updateMobileStatus('sending', '📤 Sending data to desktop...');
+            
+            // Send the extracted data via WebRTC
+            this.dataChannel.send(JSON.stringify(this.extractedData));
+            
+            // Show success message
+            this.updateMobileStatus('connected', '✅ Data sent successfully!');
+            
+            // Hide the action buttons
+            const actionButtons = document.querySelector('#extractedData .btn');
+            if (actionButtons) {
+                actionButtons.parentElement.innerHTML = `
+                    <div style="text-align: center; padding: 16px; background: #f0fdf4; border-radius: 8px; color: #059669;">
+                        <strong>✅ Insurance data sent to desktop!</strong><br>
+                        <small>You can now close this tab and return to your desktop.</small>
+                    </div>
+                `;
+            }
+            
+            // Optional: Close after delay
+            setTimeout(() => {
+                if (confirm('Data sent successfully! Close this tab?')) {
+                    window.close();
+                }
+            }, 3000);
+            
+        } catch (error) {
+            console.error('Failed to send data to desktop:', error);
+            this.updateMobileStatus('error', '❌ Failed to send data');
+            this.showError('Failed to send data to desktop. Please try again.');
+        }
+    }
+
     editAndContinue() {
         if (!this.extractedData) {
             this.showError('No data to edit. Please scan a card first.');
             return;
         }
+        
+        // In mobile mode, just send the data - editing happens on desktop
+        if (this.isMobileMode && this.dataChannel && this.dataChannel.readyState === 'open') {
+            this.sendDataToDesktop();
+            return;
+        }
 
-        // Add security enhancements to prevent tampering
+        // Normal desktop mode - store locally and redirect
         const timestamp = Date.now();
         const dataWithSecurity = {
             ...this.extractedData,
