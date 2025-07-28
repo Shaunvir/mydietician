@@ -1300,8 +1300,7 @@
                     // Generate mobile URL with proper protocol handling
                     const protocol = window.location.protocol;
                     const host = window.location.host;
-                    //const mobileUrl = `${protocol}//${host}/scan-card.html?session=${this.sessionId}&mode=mobile`;
-                    const mobileUrl = `https://my-dietitian.ca/scan-card.html?session=${this.sessionId}&mode=mobile`;
+                    const mobileUrl = `${protocol}//${host}/scan-card.html?session=${this.sessionId}&mode=mobile`;
                     document.getElementById('qrUrl').value = mobileUrl;
                     
                     // Update status while generating QR
