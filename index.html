@@ -949,6 +949,15 @@
         // Simplified form validation that works with dual submission
         document.getElementById('assessmentForm').addEventListener('submit', async function(e) {
             e.preventDefault(); // Always prevent default to handle with dual submission
+            
+            // Check if user selected "No" for insurance benefits
+            const benefitsSelect = document.getElementById('benefits');
+            if (benefitsSelect && benefitsSelect.value === 'No') {
+                // Redirect to Health811 page instead of submitting form
+                window.location.href = 'health811-redirect.html';
+                return;
+            }
+            
             // Clear previous errors
             document.querySelectorAll('.error').forEach(error => error.textContent = '');
             

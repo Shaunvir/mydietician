@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Free Nutrition Support - My-Dietitian</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            line-height: 1.6;
+            color: #1a1a1a;
+            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .redirect-container {
+            max-width: 600px;
+            background: white;
+            padding: 48px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            margin: 24px;
+        }
+
+        .redirect-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            margin: 0 auto 32px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        h1 {
+            font-size: 32px;
+            font-weight: 700;
+            color: #16a34a;
+            margin-bottom: 16px;
+        }
+
+        .message {
+            font-size: 18px;
+            color: #6b7280;
+            margin-bottom: 32px;
+            line-height: 1.6;
+        }
+
+        .health811-info {
+            background: #f0f9ff;
+            padding: 24px;
+            border-radius: 12px;
+            margin-bottom: 32px;
+            text-align: left;
+            border: 1px solid #e0f2fe;
+        }
+
+        .health811-info h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #0f172a;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .health811-info ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .health811-info li {
+            padding: 6px 0;
+            color: #475569;
+            position: relative;
+            padding-left: 24px;
+        }
+
+        .health811-info li::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #16a34a;
+            font-weight: bold;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 24px;
+        }
+
+        .primary-button {
+            background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+            color: white;
+            padding: 16px 32px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .primary-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(22, 163, 74, 0.3);
+        }
+
+        .secondary-button {
+            background: white;
+            color: #6b7280;
+            padding: 16px 32px;
+            font-size: 16px;
+            font-weight: 600;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .secondary-button:hover {
+            background: #f9fafb;
+            border-color: #d1d5db;
+        }
+
+        .countdown {
+            font-size: 14px;
+            color: #9ca3af;
+            background: #f9fafb;
+            padding: 12px 20px;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .countdown strong {
+            color: #16a34a;
+        }
+
+        @media (max-width: 768px) {
+            .redirect-container {
+                padding: 32px 24px;
+                margin: 16px;
+            }
+
+            h1 {
+                font-size: 28px;
+            }
+
+            .message {
+                font-size: 16px;
+            }
+
+            .buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .primary-button,
+            .secondary-button {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="redirect-container">
+        <div class="redirect-icon">🏥</div>
+        
+        <h1>We're connecting you with free nutrition support</h1>
+        
+        <p class="message">
+            Since you don't have employer health benefits, we're redirecting you to Health811 Ontario, 
+            where you can speak to a dietitian completely free of charge.
+        </p>
+        
+        <div class="health811-info">
+            <h3>
+                🌟 About Health811 Ontario
+            </h3>
+            <ul>
+                <li>Free consultations with registered dietitians</li>
+                <li>Available 24/7 by phone at 8-1-1</li>
+                <li>Online chat and video call options</li>
+                <li>No insurance or health card required</li>
+                <li>Professional nutrition guidance for all Ontarians</li>
+            </ul>
+        </div>
+        
+        <div class="buttons">
+            <a href="http://health811.ontario.ca/" class="primary-button" id="redirectButton">
+                Go to Health811 Now
+                <span>→</span>
+            </a>
+            
+            <a href="index.html" class="secondary-button">
+                Back to Homepage
+                <span>←</span>
+            </a>
+        </div>
+        
+        <div class="countdown" id="countdown">
+            Automatically redirecting to <strong>Health811</strong> in <span id="timer">8</span> seconds...
+        </div>
+    </div>
+
+    <script>
+        // Auto-redirect after 8 seconds
+        let timeLeft = 8;
+        const timer = document.getElementById('timer');
+        const countdown = document.getElementById('countdown');
+        let countdownInterval;
+        
+        function startCountdown() {
+            countdownInterval = setInterval(() => {
+                timeLeft--;
+                timer.textContent = timeLeft;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(countdownInterval);
+                    window.location.href = 'http://health811.ontario.ca/';
+                }
+            }, 1000);
+        }
+        
+        function stopCountdown() {
+            clearInterval(countdownInterval);
+            countdown.style.display = 'none';
+        }
+        
+        // Start countdown when page loads
+        document.addEventListener('DOMContentLoaded', startCountdown);
+        
+        // Cancel auto-redirect if user interacts with the page
+        document.addEventListener('click', stopCountdown);
+        document.addEventListener('keydown', stopCountdown);
+        
+        // Handle manual redirect button
+        document.getElementById('redirectButton').addEventListener('click', function() {
+            stopCountdown();
+            // Let the link work normally
+        });
+        
+        // Add some visual feedback for accessibility
+        document.addEventListener('DOMContentLoaded', function() {
+            // Announce to screen readers
+            const announcement = document.createElement('div');
+            announcement.setAttribute('aria-live', 'polite');
+            announcement.setAttribute('class', 'sr-only');
+            announcement.style.position = 'absolute';
+            announcement.style.left = '-10000px';
+            announcement.textContent = 'You are being redirected to Health811 Ontario for free nutrition support. You can speak to a registered dietitian at no cost.';
+            document.body.appendChild(announcement);
+        });
+    </script>
+</body>
+</html>
