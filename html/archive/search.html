@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Find a Dietitian - MyDietitian</title>
+    
+    <link rel="stylesheet" href="../../css/archive/search.css">
+</head>
+<body>
+    <a href="index.html" class="back-link">← Back to Home</a>
+    
+    <div class="search-container">
+        <div class="search-header">
+            <h1 class="search-title">Find a dietitian</h1>
+            <p class="search-subtitle">covered by insurance</p>
+        </div>
+
+        <div class="validation-message" id="validationMessage"></div>
+
+        <form id="searchForm" action="results.html" method="GET">
+            <div class="form-group">
+                <label for="name">Full Name*</label>
+                <div class="input-wrapper">
+                    <span class="input-icon">👤</span>
+                    <input type="text" class="form-input" name="name" id="name" required placeholder="Enter your full name">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email Address*</label>
+                <div class="input-wrapper">
+                    <span class="input-icon">📧</span>
+                    <input type="email" class="form-input" name="email" id="email" required placeholder="Enter your email address">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="phone">Phone Number*</label>
+                <div class="input-wrapper">
+                    <span class="input-icon">📞</span>
+                    <input type="tel" class="form-input" name="phone" id="phone" required placeholder="Enter your phone number">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="input-wrapper">
+                    <span class="input-icon">📍</span>
+                    <select class="form-select" name="location" id="location" required>
+                        <option value="">Province*</option>
+                        <option value="Alberta">Alberta</option>
+                        <option value="British Columbia">British Columbia</option>
+                        <option value="Manitoba">Manitoba</option>
+                        <option value="New Brunswick">New Brunswick</option>
+                        <option value="Newfoundland and Labrador">Newfoundland and Labrador</option>
+                        <option value="Nova Scotia">Nova Scotia</option>
+                        <option value="Ontario">Ontario</option>
+                        <option value="Prince Edward Island">Prince Edward Island</option>
+                        <option value="Quebec">Quebec</option>
+                        <option value="Saskatchewan">Saskatchewan</option>
+                        <option value="Northwest Territories">Northwest Territories</option>
+                        <option value="Nunavut">Nunavut</option>
+                        <option value="Yukon">Yukon</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="input-wrapper">
+                    <span class="input-icon">🏥</span>
+                    <select class="form-select" name="insurance" id="insurance" required>
+                        <option value="">Insurance*</option>
+                        <option value="Canada Life">Canada Life</option>
+                        <option value="Sun Life Financial">Sun Life Financial</option>
+                        <option value="Manulife">Manulife</option>
+                        <option value="Great-West Life">Great-West Life</option>
+                        <option value="Blue Cross">Blue Cross</option>
+                        <option value="Chambers of Commerce Group Insurance">Chambers of Commerce Group Insurance</option>
+                        <option value="Desjardins Insurance">Desjardins Insurance</option>
+                        <option value="Industrial Alliance">Industrial Alliance</option>
+                        <option value="Medavie Blue Cross">Medavie Blue Cross</option>
+                        <option value="Green Shield Canada">Green Shield Canada</option>
+                        <option value="GroupHEALTH">GroupHEALTH</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="input-wrapper">
+                    <span class="input-icon">⭐</span>
+                    <select class="form-select" name="specialty" id="specialty">
+                        <option value="">Specialties</option>
+                        <option value="Weight Management">Weight Management</option>
+                        <option value="Diabetes Management">Diabetes Management</option>
+                        <option value="Heart Health">Heart Health</option>
+                        <option value="Gut Health">Gut Health</option>
+                        <option value="Sports Nutrition">Sports Nutrition</option>
+                        <option value="Eating Disorders">Eating Disorders</option>
+                        <option value="Pregnancy & Postpartum">Pregnancy & Postpartum</option>
+                        <option value="Pediatric Nutrition">Pediatric Nutrition</option>
+                        <option value="Food Allergies & Sensitivities">Food Allergies & Sensitivities</option>
+                        <option value="General Nutrition">General Nutrition</option>
+                        <option value="Autoimmune Conditions">Autoimmune Conditions</option>
+                        <option value="Cancer Nutrition">Cancer Nutrition</option>
+                        <option value="PCOS">PCOS</option>
+                        <option value="Menopause">Menopause</option>
+                        <option value="High Blood Pressure">High Blood Pressure</option>
+                        <option value="High Cholesterol">High Cholesterol</option>
+                        <option value="Kidney Disease">Kidney Disease</option>
+                        <option value="Transplant Nutrition">Transplant Nutrition</option>
+                        <option value="Vegan & Vegetarian">Vegan & Vegetarian</option>
+                        <option value="Oral Health">Oral Health</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="member-id">Member ID*</label>
+                <div class="input-wrapper">
+                    <span class="input-icon">🆔</span>
+                    <input type="text" class="form-input" name="member_id" id="member-id" required placeholder="From your benefits card">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="group-number">Group Number (if applicable)</label>
+                <div class="input-wrapper">
+                    <span class="input-icon">👥</span>
+                    <input type="text" class="form-input" name="group_number" id="group-number" placeholder="Optional - if shown on your card">
+                </div>
+            </div>
+
+            <button type="submit" class="search-button">
+                <span class="search-icon">🔍</span>
+                Search
+            </button>
+        </form>
+    </div>
+
+    <script src="../../js/archive/search.js"></script>
+</body>
+</html>

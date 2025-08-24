@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Find Nutritionists and Dietitians - MyDietitian</title>
+    <link rel="stylesheet" href="../../css/archive/results.css">
+
+    <!-- Calendly embed resources -->
+    <link href="https://assets.calendly.com/assets/external/widget.css" rel="stylesheet">
+    <script src="https://assets.calendly.com/assets/external/widget.js" type="text/javascript" async></script>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <h1 class="page-title">Find Nutritionists and Dietitians</h1>
+                <a href="search.html" class="back-link">← New Search</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Filters Bar -->
+    <div class="filters-bar">
+        <div class="container">
+            <div class="filters-content">
+                <select class="filter-select" id="insuranceFilter">
+                    <option value="">All Insurance</option>
+                    <option value="Canada Life">Canada Life</option>
+                    <option value="Sun Life Financial">Sun Life Financial</option>
+                    <option value="Manulife">Manulife</option>
+                    <option value="Great-West Life">Great-West Life</option>
+                    <option value="Blue Cross">Blue Cross</option>
+                </select>
+
+                <select class="filter-select" id="locationFilter">
+                    <option value="">All Locations</option>
+                    <option value="Toronto">Toronto, ON</option>
+                    <option value="Vancouver">Vancouver, BC</option>
+                    <option value="Montreal">Montreal, QC</option>
+                </select>
+
+                <select class="filter-select" id="specialtyFilter">
+                    <option value="">Specialties (1)</option>
+                    <option value="Weight Management">Weight Management</option>
+                    <option value="Diabetes Management">Diabetes Management</option>
+                    <option value="Heart Health">Heart Health</option>
+                    <option value="Gut Health">Gut Health</option>
+                    <option value="Sports Nutrition">Sports Nutrition</option>
+                </select>
+
+                <select class="filter-select" id="modalitiesFilter">
+                    <option value="">Modalities</option>
+                    <option value="Video calls">Video calls</option>
+                    <option value="In-person">In-person</option>
+                    <option value="Phone">Phone</option>
+                </select>
+
+                <select class="filter-select" id="sortFilter">
+                    <option value="">Sort</option>
+                    <option value="name">Name</option>
+                    <option value="location">Location</option>
+                    <option value="availability">Availability</option>
+                </select>
+
+                <select class="filter-select" id="visitTypeFilter">
+                    <option value="">Visit Ty</option>
+                    <option value="Initial">Initial Consultation</option>
+                    <option value="Follow-up">Follow-up</option>
+                </select>
+
+                <button class="clear-filters" onclick="clearAllFilters()">Clear</button>
+                <button class="save-button" onclick="applyCurrentFilters()">Apply Filters</button>
+
+                <div class="results-count">
+                    <span id="resultsCount">2</span> dietitians / nutritionists in <span id="currentLocation">Canada</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="main-content">
+            <!-- Sidebar Filters -->
+            <aside class="sidebar">
+                <div class="filter-section">
+                    <h3>Specialties</h3>
+                    <div class="filter-options" id="specialtyOptions">
+                        <div class="filter-option">
+                            <input type="checkbox" id="accountability" value="Accountability">
+                            <label for="accountability">Accountability</label>
+                        </div>
+                        <div class="filter-option">
+                            <input type="checkbox" id="cbt" value="Cognitive Behavioural Therapy (CBT)">
+                            <label for="cbt">Cognitive Behavioural Therapy (CBT)</label>
+                        </div>
+                        <div class="filter-option">
+                            <input type="checkbox" id="elimination" value="Elimination Diet">
+                            <label for="elimination">Elimination Diet</label>
+                        </div>
+                        <div class="filter-option">
+                            <input type="checkbox" id="exercise" value="Exercise">
+                            <label for="exercise">Exercise</label>
+                        </div>
+                        <div class="filter-option">
+                            <input type="checkbox" id="fodmap" value="FODMAP">
+                            <label for="fodmap">FODMAP</label>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Results Area -->
+            <main class="results-area">
+                <!-- Dietitian 1 -->
+                <div class="dietitian-card" data-location="Toronto" data-insurance="Canada Life,Sun Life Financial,Manulife,Great-West Life,Blue Cross,Chambers of Commerce Group Insurance,Desjardins Insurance,Industrial Alliance,Medavie Blue Cross,GroupHEALTH" data-specialties="Weight Management,Diabetes Management,Heart Health,Sports Nutrition,PCOS Management,Autoimmune Conditions,Food Allergies & Sensitivities,Gut Health,General Nutrition,Pregnancy & Postpartum,High Blood Pressure,High Cholesterol,Kidney Disease,Vegan & Vegetarian,Eating Disorders,Pediatric Nutrition,Cancer Nutrition,Menopause,Transplant Nutrition,Oral Health" data-modalities="Video calls,In-person">
+                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Crect width='120' height='120' rx='60' fill='%23ecfdf5'/%3E%3Ctext x='60' y='75' text-anchor='middle' font-size='48' fill='%2310b981'%3E👩‍⚕️%3C/text%3E%3C/svg%3E" alt="Julia Stanislavskaia" class="dietitian-avatar">
+                    
+                    <div class="dietitian-info">
+                        <h2 class="dietitian-name">Julia Stanislavskaia, MSc, BSc, RD</h2>
+                        
+                        <div class="dietitian-credentials">
+                            <div class="credential-badge">
+                                📹 Video calls
+                            </div>
+                            <div class="credential-badge">
+                                👥 In-person
+                            </div>
+                            <div class="insurance-badge">
+                                ✓ Accepts All Major Insurance
+                            </div>
+                        </div>
+
+                        <div class="specialties">
+                            <div class="specialties-label">Specialties:</div>
+                            <div class="specialties-list">
+                                Weight Management, Diabetes Management, Heart Health, Sports Nutrition, PCOS Management, Autoimmune Conditions, Food Allergies & Sensitivities, Gut Health, General Nutrition, Pregnancy & Postpartum, High Blood Pressure, High Cholesterol, Kidney Disease, Vegan & Vegetarian, Eating Disorders, Pediatric Nutrition, Cancer Nutrition, Menopause, Transplant Nutrition, Oral Health
+                            </div>
+                        </div>
+
+                        <p class="dietitian-description">
+                            As a registered dietitian with advanced degrees in nutrition science, I provide evidence-based nutrition counseling to help clients achieve their health goals. My approach combines clinical expertise with practical strategies tailored to each individual's unique needs and lifestyle.
+                        </p>
+
+                        <div class="availability">
+                            <div class="availability-slot">July 30<br>4 appt</div>
+                            <div class="availability-slot">August 2<br>6 appt</div>
+                            <div class="availability-slot">August 7<br>3 appt</div>
+                        </div>
+
+                        <div class="dietitian-actions">
+                            <button class="btn-primary" onclick="Calendly.initPopupWidget({url: 'https://calendly.com/jstanislvskaia'}); return false;">Book now</button>
+                            <button class="btn-secondary" onclick="viewProfile('Julia Stanislavskaia')">View profile</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dietitian 2 -->
+                <div class="dietitian-card" data-location="Toronto" data-insurance="Canada Life,Sun Life Financial,Manulife,Great-West Life,Blue Cross,Chambers of Commerce Group Insurance,Desjardins Insurance,Industrial Alliance,Medavie Blue Cross,GroupHEALTH" data-specialties="Weight Management,Diabetes Management,Heart Health,Sports Nutrition,PCOS Management,Autoimmune Conditions,Food Allergies & Sensitivities,Gut Health,General Nutrition,Pregnancy & Postpartum,High Blood Pressure,High Cholesterol,Kidney Disease,Vegan & Vegetarian,Eating Disorders,Pediatric Nutrition,Cancer Nutrition,Menopause,Transplant Nutrition,Oral Health" data-modalities="Video calls,In-person">
+                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Crect width='120' height='120' rx='60' fill='%23fef2f2'/%3E%3Ctext x='60' y='75' text-anchor='middle' font-size='48' fill='%23dc2626'%3E👩‍⚕️%3C/text%3E%3C/svg%3E" alt="Rowena Leung" class="dietitian-avatar">
+                    
+                    <div class="dietitian-info">
+                        <h2 class="dietitian-name">Rowena Leung, RD, CDE</h2>
+                        
+                        <div class="dietitian-credentials">
+                            <div class="credential-badge">
+                                📹 Video calls
+                            </div>
+                            <div class="credential-badge">
+                                👥 In-person
+                            </div>
+                            <div class="insurance-badge">
+                                ✓ Accepts All Major Insurance
+                            </div>
+                        </div>
+
+                        <div class="specialties">
+                            <div class="specialties-label">Specialties:</div>
+                            <div class="specialties-list">
+                                Weight Management, Diabetes Management, Heart Health, Sports Nutrition, PCOS Management, Autoimmune Conditions, Food Allergies & Sensitivities, Gut Health, General Nutrition, Pregnancy & Postpartum, High Blood Pressure, High Cholesterol, Kidney Disease, Vegan & Vegetarian, Eating Disorders, Pediatric Nutrition, Cancer Nutrition, Menopause, Transplant Nutrition, Oral Health
+                            </div>
+                        </div>
+
+                        <p class="dietitian-description">
+                            As a registered dietitian and certified diabetes educator, I specialize in helping clients manage chronic conditions through personalized nutrition therapy. My expertise in diabetes education allows me to provide comprehensive support for blood sugar management and metabolic health.
+                        </p>
+
+                        <div class="availability">
+                            <div class="availability-slot">August 3<br>2 appt</div>
+                            <div class="availability-slot">August 8<br>4 appt</div>
+                            <div class="availability-slot">August 9<br>5 appt</div>
+                        </div>
+
+                        <div class="dietitian-actions">
+                            <button class="btn-primary" onclick="Calendly.initPopupWidget({url: 'https://calendly.com/rowenarecommends'}); return false;">Book now</button>
+                            <button class="btn-secondary" onclick="viewProfile('Rowena Leung')">View profile</button>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+
+    <script src="../../js/archive/results.js"></script>
+</body>
+</html>
