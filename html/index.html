@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My-Dietitian - Connect with Dietitians Covered By Insurance </title>
+    <link rel="stylesheet" href="../css/main.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <nav class="nav">
+                <a href="#" class="logo">
+                    <div class="logo-icon">🥗</div>
+                    My-Dietitian
+                </a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <div class="coverage-pill">
+                    🌱 60-70% of Canadians with employer benefits have Dietitian coverage
+                </div>
+                <h1>Connect with a Dietitian, covered by your benefits</h1>
+                <p class="hero-subtitle">Improve your nutrition in a way that fits your life and budget. </p>
+                <div style="margin-top: 32px;">
+                    <a href="#assessment" class="cta-primary">
+                        Start Your Journey
+                        <span>→</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Benefits Section -->
+    <section class="benefits" id="benefits-section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Why Choose My-Dietitian?</h2>
+                <p class="section-subtitle">We work with major Canadian insurers including Canada Life, Sunlife, Manulife, and more</p>
+            </div>
+            
+            <div class="benefits-grid">
+                <div class="benefit-card">
+                    <div class="benefit-icon">💰</div>
+                    <h3>Most Pay $0 Out-of-Pocket</h3>
+                    <p>With employer benefits, most clients pay nothing for their Dietitian consultations</p>
+                </div>
+                <div class="benefit-card">
+                    <div class="benefit-icon">📱</div>
+                    <h3>Flexible Virtual Care</h3>
+                    <p>Video calls, phone, or in-person options that fit your schedule</p>
+                </div>
+                <div class="benefit-card">
+                    <div class="benefit-icon">🚀</div>
+                    <h3>No Referral Needed</h3>
+                    <p>Book directly with registered healthcare professionals</p>
+                </div>
+                <div class="benefit-card">
+                    <div class="benefit-icon">🎓</div>
+                    <h3>Regulated Professionals</h3>
+                    <p>All Dietitians registered with provincial regulatory bodies</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section class="how-it-works">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">How It Works</h2>
+                <p class="section-subtitle">Get started in just 4 simple steps</p>
+            </div>
+            
+            <div class="steps-container">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h3>Complete 2-Minute Assessment</h3>
+                        <p>Tell us about your health goals and insurance coverage</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h3>We Verify Your Benefits</h3>
+                        <p>Our team confirms your Dietitian coverage with your insurer</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h3>Get Matched</h3>
+                        <p>We connect you with a local registered Dietitian</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <h3>Schedule Consultation</h3>
+                        <p>Book your first virtual appointment at your convenience</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Assessment Form -->
+    <section class="assessment" id="assessment">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Get Started Today</h2>
+                <p class="section-subtitle">Complete this quick assessment to connect with a registered Dietitian</p>
+            </div>
+            
+            <div class="form-container">
+                <div class="success-message" id="successMessage">
+                    ✅ Thanks! We'll get back to you in 3-5 business days!
+                </div>
+                
+                <form id="assessmentForm" action="https://formspree.io/f/xeozkgvr" method="POST">
+                    <!-- Formspree configuration -->
+                    <input type="hidden" name="_subject" value="New My-Dietitian Assessment Submission">
+                    <input type="hidden" name="_next" value="thank-you.html">
+                    <input type="hidden" name="_autoresponse" value="Thanks! We received your assessment and will get back to you within 5 business days. A registered Dietitian from our team will be in touch soon to help you achieve your health goals.">
+                    <input type="hidden" name="_captcha" value="false">
+                    
+                    <div class="form-group">
+                        <label for="name">Full Name *</label>
+                        <input type="text" id="name" name="name" required>
+                        <div class="error" id="nameError"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email">Email Address *</label>
+                        <input type="email" id="email" name="email" required>
+                        <div class="error" id="emailError"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="phone">Phone Number *</label>
+                        <input type="tel" id="phone" name="phone" placeholder="(___) ___-____" required>
+                        <div class="error" id="phoneError"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="province">Province of Residence *</label>
+                        <select id="province" name="province" required>
+                            <option value="">Select your province</option>
+                            <option value="Alberta">Alberta</option>
+                            <option value="British Columbia">British Columbia</option>
+                            <option value="Manitoba">Manitoba</option>
+                            <option value="New Brunswick">New Brunswick</option>
+                            <option value="Newfoundland and Labrador">Newfoundland and Labrador</option>
+                            <option value="Nova Scotia">Nova Scotia</option>
+                            <option value="Ontario">Ontario</option>
+                            <option value="Prince Edward Island">Prince Edward Island</option>
+                            <option value="Quebec">Quebec</option>
+                            <option value="Saskatchewan">Saskatchewan</option>
+                            <option value="Northwest Territories">Northwest Territories</option>
+                            <option value="Nunavut">Nunavut</option>
+                            <option value="Yukon">Yukon</option>
+                        </select>
+                        <div class="error" id="provinceError"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="benefits">Do you have employer health benefits? *</label>
+                        <select id="benefits" name="benefits" required>
+                            <option value="">Please select</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                            <option value="Unsure">Unsure</option>
+                        </select>
+                        <div class="error" id="benefitsError"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="insurer">Insurance Provider (if known)</label>
+                        <select id="insurer" name="insurer">
+                            <option value="">Select your insurer</option>
+                            <option value="Canada Life">Canada Life</option>
+                            <option value="Sun Life Financial">Sun Life Financial</option>
+                            <option value="Manulife">Manulife</option>
+                            <option value="Great-West Life">Great-West Life</option>
+                            <option value="Blue Cross">Blue Cross</option>
+                            <option value="Chambers of Commerce Group Insurance">Chambers of Commerce Group Insurance</option>
+                            <option value="Desjardins Insurance">Desjardins Insurance</option>
+                            <option value="Industrial Alliance">Industrial Alliance</option>
+                            <option value="Other">Other</option>
+                            <option value="Don't know">Don't know</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="member-id">Member ID *</label>
+                        <input type="text" id="member-id" name="member_id" placeholder="From your benefits card" required>
+                        <div class="error" id="memberIdError"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="group-number">Group Number (if applicable)</label>
+                        <input type="text" id="group-number" name="group_number" placeholder="Optional - if shown on your card">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="referred-by">Referred by (optional)</label>
+                        <input type="text" id="referred-by" name="referred_by" placeholder="e.g. Dr. Smith's Clinic, Toronto Wellness Center">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Primary Health Goals * (Select all that apply)</label>
+                        <div class="checkbox-grid">
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="injury" name="health_goals[]" value="Injury Recovery">
+                                <label for="injury">Injury Recovery</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="weight" name="health_goals[]" value="Weight Management">
+                                <label for="weight">Weight Management</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="diabetes" name="health_goals[]" value="Diabetes Management">
+                                <label for="diabetes">Diabetes Management</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="heart" name="health_goals[]" value="Heart Health">
+                                <label for="heart">Heart Health</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="gut" name="health_goals[]" value="Gut Health">
+                                <label for="gut">Gut Health</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="wellness" name="health_goals[]" value="General Wellness">
+                                <label for="wellness">General Wellness</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="sports" name="health_goals[]" value="Sports Nutrition">
+                                <label for="sports">Sports Nutrition</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="oral" name="health_goals[]" value="Oral Health">
+                                <label for="oral">Oral Health</label>
+                            </div>
+                        </div>
+                        <div class="error" id="goalsError"></div>
+                    </div>
+                    
+                    <!-- <div class="form-group">
+                        <label for="consultation-type">Preferred Consultation Type *</label>
+                        <select id="consultation-type" name="consultation_type" required>
+                            <option value="">Select preference</option>
+                            <option value="Video Call">Video Call</option>
+                            <option value="Phone Call">Phone Call</option>
+                            <option value="In-Person (if available)">In-Person (if available)</option>
+                            <option value="Flexible - any option">Flexible - any option</option>
+                        </select>
+                        <div class="error" id="consultationTypeError"></div>
+                    </div> -->
+                    
+                    <div class="form-group">
+                        <label for="description">Brief description of what you're looking for</label>
+                        <textarea id="description" name="description" rows="4" placeholder="Tell us about your nutrition goals, any specific concerns, or what you hope to achieve..."></textarea>
+                    </div>
+                    
+                    <button type="submit" class="cta-primary submit-button" style="width: 100%; justify-content: center;" id="submitButton">
+                        Get Matched with a Dietitian
+                        <span>→</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Trust Section -->
+    <section class="trust">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Accepted by millions of Canadian's benefits plans</h2>
+                <p class="section-subtitle">Join the growing community of people improving their health with professional nutrition guidance</p>
+            </div>
+            
+            <div class="trust-badges">
+                <div class="trust-badge">✓ Licensed Professionals</div>
+                <div class="trust-badge">✓ Insurance Verified</div>
+                <div class="trust-badge">✓ Fully compliant </div>
+                <div class="trust-badge">✓ Community Support</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="testimonials">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">What Our Clients Say</h2>
+                <p class="section-subtitle">Real stories from people who've transformed their health with My-Dietitian</p>
+            </div>
+            
+            <div class="testimonials-grid">
+                <div class="testimonial">
+                    <p class="testimonial-text">"I was amazed that my insurance covered everything. Sarah helped me understand my diabetes better and create a meal plan that actually works with my busy schedule. My blood sugar is finally stable!"</p>
+                    <div class="testimonial-author">Michael Chen</div>
+                    <div class="testimonial-location">Toronto, ON</div>
+                </div>
+                <div class="testimonial">
+                    <p class="testimonial-text">"The process was so simple. I filled out the form, got matched with a Dietitian in my area, and had my first video call within a week. Best part? $0 out of pocket with my work benefits."</p>
+                    <div class="testimonial-author">Jennifer Martinez</div>
+                    <div class="testimonial-location">Vancouver, BC</div>
+                </div>
+                <div class="testimonial">
+                    <p class="testimonial-text">"After years of trying different diets, having a registered Dietitian explain the science behind nutrition was game-changing. I've lost 30 pounds and feel amazing!"</p>
+                    <div class="testimonial-author">David Thompson</div>
+                    <div class="testimonial-location">Calgary, AB</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script src="../js/main.js"></script>
+</body>
+</html>
