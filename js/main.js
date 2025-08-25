@@ -1,4 +1,4 @@
-// SheetMonkey, Formspree, and SMTP.js email submission
+// SheetMonkey, Formspree, and EmailJS email submission
 const SHEET_MONKEY_URL = 'https://api.sheetmonkey.io/form/9MoRQbyaVfkrCsZGZW3Mt2';
 const FORMSPREE_URL = 'https://formspree.io/f/xeozkgvr';
 
@@ -257,76 +257,26 @@ function createEmailTemplate(formData) {
 
 async function sendCustomEmail(formData) {
     console.log('🔄 Starting custom email send...');
-    try {
-        const userEmail = formData.get('email');
-        const userName = formData.get('name');
-        
-        console.log('📧 Email details:', {
-            to: userEmail,
-            from: "my.dietitian.ca@gmail.com",
-            subject: `Welcome to My-Dietitian, ${userName}! Your Assessment Received`
-        });
-        
-        console.log('⚙️ SMTP Config:', {
-            Host: SMTP_CONFIG.Host,
-            Username: SMTP_CONFIG.Username,
-            Port: SMTP_CONFIG.Port,
-            HasPassword: !!SMTP_CONFIG.Password
-        });
-
-        const emailBody = createEmailTemplate(formData);
-        console.log('📝 Email template created, length:', emailBody.length);
-
-        console.log('🚀 Attempting to send email via SMTP.js...');
-        
-        // Try SMTP.js with additional configuration for CORS
-        const result = await Email.send({
-            Host: SMTP_CONFIG.Host,
-            Username: SMTP_CONFIG.Username,
-            Password: SMTP_CONFIG.Password,
-            To: userEmail,
-            From: "my.dietitian.ca@gmail.com",
-            Subject: `Welcome to My-Dietitian, ${userName}! Your Assessment Received`,
-            Body: emailBody,
-            // Add these properties to help with CORS and ElasticEmail
-            SecureToken: SMTP_CONFIG.Password, // Some services prefer this over Password
-            Port: SMTP_CONFIG.Port,
-            EnableSSL: true,
-            // Additional headers that might help with CORS
-            Headers: {
-                'Content-Type': 'text/html; charset=utf-8',
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        });
-
-        console.log('✅ Custom email sent successfully:', result);
-        return true;
-    } catch (error) {
-        console.error('❌ Custom email sending failed with details:', {
-            error: error,
-            message: error.message,
-            stack: error.stack,
-            name: error.name
-        });
-        
-        // Check if it's a CORS error specifically
-        if (error.message && error.message.toLowerCase().includes('cors')) {
-            console.error('🚫 CORS Error detected! This is a common issue with browser-based SMTP.');
-            console.log('💡 Possible solutions:');
-            console.log('1. Use SMTP.js secure token instead of direct SMTP');
-            console.log('2. Set up SMTP.js with a proxy service');
-            console.log('3. Use server-side email sending instead');
+    // EmailJS-only send path
+    if (typeof sendContactForm === 'function' && typeof emailjs !== 'undefined') {
+        try {
+            console.log('📧 Sending email via EmailJS...');
+            await sendContactForm(formData);
+            console.log('✅ Email sent via EmailJS');
+            return true;
+        } catch (err) {
+            console.error('❌ EmailJS send failed:', err);
+            sessionStorage.setItem('emailError', JSON.stringify({
+                message: err.message || String(err),
+                timestamp: new Date().toISOString(),
+                details: err.toString()
+            }));
+            throw err;
         }
-        
-        // Store error in sessionStorage so it persists across redirects
-        sessionStorage.setItem('emailError', JSON.stringify({
-            message: error.message,
-            timestamp: new Date().toISOString(),
-            details: error.toString(),
-            isCorsError: error.message && error.message.toLowerCase().includes('cors')
-        }));
-        
-        throw error;
+    } else {
+        const msg = 'EmailJS not configured or emailjs library not loaded.';
+        console.error('❌', msg);
+        throw new Error(msg);
     }
 }
 
@@ -665,35 +615,25 @@ window.addEventListener('scroll', function() {
     }
 });
 
-// Debug function to test email sending
+// Debug function to test EmailJS sending
 function testEmailDebug() {
-    console.log('🧪 Running email debug test...');
-    
-    // Check if SMTP.js is loaded
-    if (typeof Email === 'undefined') {
-        console.error('❌ SMTP.js not loaded!');
-        alert('SMTP.js library not loaded. Check the script tag in index.html');
+    console.log('🧪 Running EmailJS debug test...');
+
+    if (typeof emailjs === 'undefined') {
+        console.error('❌ EmailJS library not loaded! Include the CDN script.');
+        alert('EmailJS library not loaded. Check the script tag in index.html');
         return;
     }
-    
-    // Check if email config is available
-    if (typeof SMTP_CONFIG === 'undefined') {
-        console.error('❌ SMTP_CONFIG not defined!');
-        alert('Email configuration not loaded. Check email-config.js');
-        return;
-    }
-    
-    console.log('✅ SMTP.js and config loaded');
-    
+
     // Create test form data
     const testFormData = new FormData();
     testFormData.append('name', 'Test User');
     testFormData.append('email', 'test@example.com');
-    
+
     // Test the email function
     sendCustomEmail(testFormData)
         .then(() => {
-            console.log('✅ Test email sent successfully');
+            console.log('✅ Test email sent successfully via EmailJS');
             alert('Test email sent successfully! Check the console for details.');
         })
         .catch((error) => {
@@ -702,27 +642,21 @@ function testEmailDebug() {
         });
 }
 
-// Test secure token approach
-function testSecureTokenEmail() {
-    console.log('🔐 Testing secure token email...');
-    
-    if (typeof sendEmailWithSecureToken === 'undefined') {
-        alert('Secure token function not available. Check email-config.js');
+// Expose EmailJS test helper
+function testEmailJSSend() {
+    if (typeof testEmailJSConfig !== 'function') {
+        alert('EmailJS test helper not available. Ensure js/emailjs-send.js is loaded and EMAILJS is configured.');
         return;
     }
-    
-    const testFormData = new FormData();
-    testFormData.append('name', 'Test User');
-    testFormData.append('email', 'test@example.com');
-    
-    sendEmailWithSecureToken(testFormData)
+
+    testEmailJSConfig()
         .then(() => {
-            console.log('✅ Secure token email sent successfully');
-            alert('Secure token email sent successfully!');
+            console.log('✅ EmailJS test send succeeded');
+            alert('EmailJS test send succeeded!');
         })
-        .catch((error) => {
-            console.error('❌ Secure token email failed:', error);
-            alert(`Secure token email failed: ${error.message}`);
+        .catch((err) => {
+            console.error('❌ EmailJS test send failed:', err);
+            alert(`EmailJS test failed: ${err.message || String(err)}`);
         });
 }
 
@@ -730,4 +664,4 @@ function testSecureTokenEmail() {
 
 // Make functions globally available for debugging
 window.testEmailDebug = testEmailDebug;
-window.testSecureTokenEmail = testSecureTokenEmail;
+window.testEmailJSSend = testEmailJSSend;

@@ -1,93 +1,101 @@
-// Email configuration for SMTP.js
-// IMPORTANT: You need to set up an SMTP service to use this functionality
+// Email configuration for EmailJS
+// IMPORTANT: Replace the placeholders with your actual EmailJS values
 
-const EMAIL_CONFIG = {
-    // Option 1: Use ElasticEmail (recommended for production)
-    elasticEmail: {
-        Host: "smtp.elasticemail.com",
-        Username: "my.dietitian.ca@gmail.com",
-        Password: "09A704EB69609A97EC51C3DF6F9BB4455894", // ElasticEmail API key
-        Port: 2525,
-        EnableSSL: true
-    },
-    
-    // Option 2: Use SMTP2GO
-    smtp2go: {
-        Host: "mail.smtp2go.com",
-        Username: "my.dietitian.ca@gmail.com", 
-        Password: "YOUR_SMTP2GO_PASSWORD",
-        Port: 2525,
-        EnableSSL: true
-    },
-    
-    // Option 3: Use SendGrid SMTP
-    sendGrid: {
-        Host: "smtp.sendgrid.net",
-        Username: "apikey",
-        Password: "YOUR_SENDGRID_API_KEY",
-        Port: 587,
-        EnableSSL: true
-    },
-    
-    // Option 4: SMTP.js Secure Token (Alternative approach for CORS issues)
-    // You can get a secure token from: https://smtpjs.com/
-    secureToken: {
-        SecureToken: "YOUR_SECURE_TOKEN_HERE", // Get this from smtpjs.com after setting up
-        UseSecureToken: true
-    }
-};
+// EmailJS Configuration
+const EMAILJS_PUBLIC_KEY = '6fXer2OnVAybIBX6Y';
+const EMAILJS_SERVICE_ID = 'service_1mejwpv';
+const EMAILJS_TEMPLATE_ID = 'template_e433nzb';
 
-// Default configuration (you can switch between services)
-const SMTP_CONFIG = EMAIL_CONFIG.elasticEmail;
+// EmailJS-only configuration (legacy SMTP removed)
 
-// Alternative email sending function using secure token (CORS-friendly)
-async function sendEmailWithSecureToken(formData) {
-    console.log('🔐 Attempting to send email with secure token...');
+// EmailJS send function
+async function sendEmailWithEmailJS(formData) {
+    console.log('📧 Attempting to send email with EmailJS...');
     
-    if (!EMAIL_CONFIG.secureToken.SecureToken || EMAIL_CONFIG.secureToken.SecureToken === "YOUR_SECURE_TOKEN_HERE") {
-        throw new Error('Secure token not configured. Please set up at https://smtpjs.com/');
+    // Check if EmailJS is initialized
+    if (typeof emailjs === 'undefined') {
+        throw new Error('EmailJS not loaded. Please ensure the EmailJS CDN script is included.');
     }
     
-    const userEmail = formData.get('email');
-    const userName = formData.get('name');
-    const emailBody = createEmailTemplate(formData);
+    // Check if configuration is set up
+    if (EMAILJS_PUBLIC_KEY === '<YOUR_EMAILJS_PUBLIC_KEY>' || 
+        EMAILJS_SERVICE_ID === '<YOUR_EMAILJS_SERVICE_ID>' || 
+        EMAILJS_TEMPLATE_ID === '<YOUR_EMAILJS_TEMPLATE_ID>') {
+        throw new Error('EmailJS not configured. Please update the configuration values in email-config.js');
+    }
     
-    const result = await Email.send({
-        SecureToken: EMAIL_CONFIG.secureToken.SecureToken,
-        To: userEmail,
-        From: "my.dietitian.ca@gmail.com",
-        Subject: `Welcome to My-Dietitian, ${userName}! Your Assessment Received`,
-        Body: emailBody
-    });
+    // Prepare template parameters (sending TO the patient using {{email}})
+    const templateParams = {
+        name: formData.get('name') || '',
+        email: formData.get('email') || '',
+        phone: formData.get('phone') || '',
+        province: formData.get('province') || '',
+        benefits: formData.get('benefits') || '',
+        member_id: formData.get('member-id') || '',
+        health_goals: Array.from(formData.getAll('health_goals[]')).join(', '),
+        message: 'Thank you for submitting your My-Dietitian assessment',
+        timestamp: new Date().toLocaleString(),
+        // Include the full HTML template content for the patient email
+        html_body: await loadEmailTemplate(),
+        // Additional template variables
+        patient_name: formData.get('name') || '',
+        patient_email: formData.get('email') || '',
+        dietitian_name: '[Dietitian Name]', // This can be customized later
+        your_name: 'My-Dietitian Team' // This can be customized later
+    };
     
-    return result;
+    console.log('📤 Sending email with template params:', templateParams);
+    
+    try {
+        const result = await emailjs.send(
+            EMAILJS_SERVICE_ID,
+            EMAILJS_TEMPLATE_ID,
+            templateParams
+        );
+        
+        console.log('✅ EmailJS send successful:', result);
+        return result;
+    } catch (error) {
+        console.error('❌ EmailJS send failed:', error);
+        throw error;
+    }
+}
+
+// Load email template content
+async function loadEmailTemplate() {
+    try {
+        const response = await fetch('/email_templates/book_appointment.html');
+        if (response.ok) {
+            return await response.text();
+        } else {
+            console.warn('Could not load email template, using fallback');
+            return '<p>Thank you for your My-Dietitian assessment submission!</p>';
+        }
+    } catch (error) {
+        console.warn('Error loading email template:', error);
+        return '<p>Thank you for your My-Dietitian assessment submission!</p>';
+    }
 }
 
 // Debug function to test email configuration
 function debugEmailConfig() {
     console.log('🔧 Email Configuration Debug:');
-    console.log('SMTP_CONFIG:', {
-        Host: SMTP_CONFIG.Host,
-        Username: SMTP_CONFIG.Username,
-        Port: SMTP_CONFIG.Port,
-        HasPassword: !!SMTP_CONFIG.Password,
-        PasswordLength: SMTP_CONFIG.Password ? SMTP_CONFIG.Password.length : 0,
-        EnableSSL: SMTP_CONFIG.EnableSSL
+    
+    // Check EmailJS configuration
+    console.log('EmailJS Config:', {
+        HasPublicKey: !!EMAILJS_PUBLIC_KEY && EMAILJS_PUBLIC_KEY !== '<YOUR_EMAILJS_PUBLIC_KEY>',
+        HasServiceId: !!EMAILJS_SERVICE_ID && EMAILJS_SERVICE_ID !== '<YOUR_EMAILJS_SERVICE_ID>',
+        HasTemplateId: !!EMAILJS_TEMPLATE_ID && EMAILJS_TEMPLATE_ID !== '<YOUR_EMAILJS_TEMPLATE_ID>',
+        EmailJSLoaded: typeof emailjs !== 'undefined'
     });
     
-    console.log('Secure Token Config:', {
-        HasSecureToken: !!EMAIL_CONFIG.secureToken.SecureToken,
-        IsConfigured: EMAIL_CONFIG.secureToken.SecureToken !== "YOUR_SECURE_TOKEN_HERE"
+    // Check EmailJS configuration
+    console.log('EmailJS Config:', {
+        HasPublicKey: !!EMAILJS_PUBLIC_KEY && EMAILJS_PUBLIC_KEY !== '<YOUR_EMAILJS_PUBLIC_KEY>',
+        HasServiceId: !!EMAILJS_SERVICE_ID && EMAILJS_SERVICE_ID !== '<YOUR_EMAILJS_SERVICE_ID>',
+        HasTemplateId: !!EMAILJS_TEMPLATE_ID && EMAILJS_TEMPLATE_ID !== '<YOUR_EMAILJS_TEMPLATE_ID>',
+        EmailJSLoaded: typeof emailjs !== 'undefined'
     });
-    
-    // Check if Email object is available (SMTP.js loaded)
-    if (typeof Email === 'undefined') {
-        console.error('❌ SMTP.js not loaded! Email object is undefined.');
-        alert('SMTP.js not loaded! Check the script tag in your HTML.');
-        return false;
-    } else {
-        console.log('✅ SMTP.js loaded successfully');
-    }
     
     // Test basic connectivity
     console.log('🌐 Testing CORS and connectivity...');
@@ -108,32 +116,64 @@ window.addEventListener('load', () => {
     setTimeout(debugEmailConfig, 1000);
 });
 
-// Make secure token function globally available
-window.sendEmailWithSecureToken = sendEmailWithSecureToken;
+// Make functions globally available
+window.sendEmailWithEmailJS = sendEmailWithEmailJS;
+
+// Export EmailJS configuration for ES modules
+export { EMAILJS_PUBLIC_KEY, EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, sendEmailWithEmailJS };
 
 // Instructions:
 /*
-CORS Solutions:
+EmailJS Setup Instructions:
 
-1. DIRECT SMTP (Current setup):
-   - Uses ElasticEmail directly
-   - May have CORS issues in some browsers
-   - Requires proper SMTP credentials
+1. CREATE EMAILJS ACCOUNT:
+   - Go to https://www.emailjs.com and sign up
+   - Create a new service (Gmail, Outlook, etc.)
+   - Note down your Service ID (e.g., service_xxx)
 
-2. SECURE TOKEN (Alternative):
-   - Visit https://smtpjs.com/
-   - Set up your SMTP server there
-   - Get a secure token
-   - Update EMAIL_CONFIG.secureToken.SecureToken
-   - This bypasses CORS by using SMTP.js proxy
+2. CREATE EMAIL TEMPLATE:
+   - Go to Email Templates > New Template
+   - Use these variables in your template:
+     * {{name}} - Patient's name
+     * {{email}} - Patient's email
+     * {{phone}} - Patient's phone
+     * {{province}} - Patient's province
+     * {{benefits}} - Benefits information
+     * {{member_id}} - Member ID
+     * {{health_goals}} - Selected health goals
+     * {{message}} - Form message
+     * {{timestamp}} - Submission timestamp
+     * {{html_body}} - Pre-rendered HTML template
+   - Note down your Template ID (e.g., template_xxx)
 
-3. SERVER-SIDE (Recommended for production):
-   - Move email sending to your server
-   - Use server-side libraries
-   - No CORS issues
+3. GET PUBLIC KEY:
+   - Go to Integration > General
+   - Copy your Public Key (e.g., user_xxx or starts with user_)
 
-Setup Steps:
-1. Try current ElasticEmail setup first
-2. If CORS errors occur, set up secure token at smtpjs.com
-3. For production, consider server-side email sending
+4. UPDATE CONFIGURATION:
+   - Replace <YOUR_EMAILJS_PUBLIC_KEY> with your actual public key
+   - Replace <YOUR_EMAILJS_SERVICE_ID> with your actual service ID
+   - Replace <YOUR_EMAILJS_TEMPLATE_ID> with your actual template ID
+
+5. INCLUDE EMAILJS CDN:
+   - Add the EmailJS script to your HTML pages (see index.html)
+
+Example EmailJS Template:
+Subject: New My-Dietitian Assessment from {{name}}
+
+HTML Body:
+<div>
+  <h2>New Assessment Submission</h2>
+  <p><strong>Name:</strong> {{name}}</p>
+  <p><strong>Email:</strong> {{email}}</p>
+  <p><strong>Phone:</strong> {{phone}}</p>
+  <p><strong>Province:</strong> {{province}}</p>
+  <p><strong>Benefits:</strong> {{benefits}}</p>
+  <p><strong>Member ID:</strong> {{member_id}}</p>
+  <p><strong>Health Goals:</strong> {{health_goals}}</p>
+  <p><strong>Submitted:</strong> {{timestamp}}</p>
+  <hr/>
+  <div>{{html_body}}</div>
+</div>
+
 */
