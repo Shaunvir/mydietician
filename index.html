@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My-Dietitian - Connect with Dietitians Covered By Insurance </title>
     <link rel="stylesheet" href="css/main.css">
+    
+    <!-- EmailJS CDN -->
+    <script type="text/javascript" src="https://cdn.emailjs.com/dist/email.min.js"></script>
 </head>
 <body>
     <!-- Header -->
@@ -325,8 +328,17 @@
         </div>
     </section>
 
-    <script src="https://smtpjs.com/v3/smtp.js"></script>
     <script src="js/email-config.js"></script>
+    <script src="js/emailjs-send.js"></script>
+    <script>
+        // Initialize EmailJS with your public key (ensure EMAILJS_PUBLIC_KEY is updated in email-config.js)
+        if (typeof emailjs !== 'undefined' && typeof EMAILJS_PUBLIC_KEY !== 'undefined' && EMAILJS_PUBLIC_KEY !== '<YOUR_EMAILJS_PUBLIC_KEY>') {
+            emailjs.init(EMAILJS_PUBLIC_KEY);
+            console.log('✅ EmailJS initialized successfully');
+        } else {
+            console.warn('⚠️ EmailJS not initialized. Please configure EMAILJS_PUBLIC_KEY in email-config.js');
+        }
+    </script>
     <script src="js/main.js"></script>
 </body>
 </html>
