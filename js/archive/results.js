@@ -214,8 +214,8 @@ function applyCurrentFilters() {
         params.append('sidebarSpecialties', checkedSpecialties.join(','));
     }
     
-    // Update browser URL with new parameters
-    const newUrl = params.toString() ? `results.html?${params.toString()}` : 'results.html';
+    // Update browser URL with new parameters (point to archive path)
+    const newUrl = params.toString() ? `html/archive/results.html?${params.toString()}` : 'html/archive/results.html';
     window.history.pushState({}, '', newUrl);
     console.log('Updated URL to:', newUrl);
     
@@ -392,7 +392,7 @@ function blockAccess(reason = 'default') {
                     }
                 </p>
                 <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
-                    <a href="search.html" style="
+                    <a href="html/archive/search.html" style="
                         background: #6366f1;
                         color: white;
                         padding: 12px 24px;
@@ -408,7 +408,7 @@ function blockAccess(reason = 'default') {
                     ">
                         🔍 Complete Search Form
                     </a>
-                    <a href="scan-card.html" style="
+                    <a href="html/archive/scan-card.html" style="
                         background: #10b981;
                         color: white;
                         padding: 12px 24px;
@@ -431,7 +431,7 @@ function blockAccess(reason = 'default') {
     
     // Redirect after 3 seconds if user doesn't click
     setTimeout(() => {
-        window.location.href = 'search.html';
+        window.location.href = 'html/archive/search.html';
     }, 10000);
 }
 

@@ -1,6 +1,334 @@
-// SheetMonkey and Formspree dual submission
+// SheetMonkey, Formspree, and SMTP.js email submission
 const SHEET_MONKEY_URL = 'https://api.sheetmonkey.io/form/9MoRQbyaVfkrCsZGZW3Mt2';
 const FORMSPREE_URL = 'https://formspree.io/f/xeozkgvr';
+
+// Email template function
+function createEmailTemplate(formData) {
+    const fullName = formData.get('name') || '';
+
+    return `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>My-Dietitian Email</title>
+        <style>
+            body {
+                margin: 0;
+                padding: 0;
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', Roboto, Arial, sans-serif;
+                background-color: #fafbfc;
+                line-height: 1.5;
+                color: #1a1a1a;
+            }
+            
+            .email-container {
+                max-width: 600px;
+                margin: 0 auto;
+                background-color: #ffffff;
+                border: 1px solid #e8eaed;
+                border-radius: 12px;
+                overflow: hidden;
+            }
+            
+            .header {
+                background-color: #ffffff;
+                padding: 24px 32px;
+                border-bottom: 1px solid #f0f2f5;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            
+            .logo-container {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+            }
+            
+            .logo-icon {
+                width: 48px;
+                height: 48px;
+                background-color: #22c55e;
+                border-radius: 12px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 20px;
+            }
+            
+            .logo-text {
+                font-size: 24px;
+                font-weight: 700;
+                color: #1a1a1a;
+                letter-spacing: -0.025em;
+            }
+            
+            .content {
+                padding: 32px;
+            }
+            
+            .greeting {
+                font-size: 16px;
+                font-weight: 500;
+                color: #1a1a1a;
+                margin-bottom: 24px;
+            }
+            
+            .message {
+                font-size: 16px;
+                line-height: 1.6;
+                color: #374151;
+                margin-bottom: 20px;
+            }
+            
+            .message strong {
+                color: #22c55e;
+                font-weight: 600;
+            }
+            
+            .highlight-box {
+                background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+                border: 1px solid #bbf7d0;
+                border-radius: 8px;
+                padding: 20px;
+                margin: 24px 0;
+            }
+            
+            .highlight-text {
+                font-size: 15px;
+                color: #166534;
+                margin: 0;
+                line-height: 1.5;
+            }
+            
+            .next-steps {
+                background-color: #f8fafc;
+                border-radius: 8px;
+                padding: 20px;
+                margin: 24px 0;
+                border-left: 4px solid #22c55e;
+            }
+            
+            .next-steps-title {
+                font-size: 14px;
+                font-weight: 600;
+                color: #374151;
+                margin-bottom: 8px;
+                text-transform: uppercase;
+                letter-spacing: 0.025em;
+            }
+            
+            .next-steps-text {
+                font-size: 15px;
+                color: #4b5563;
+                margin: 0;
+            }
+            
+            .closing {
+                font-size: 16px;
+                color: #374151;
+                margin-top: 24px;
+            }
+            
+            .signature {
+                margin-top: 32px;
+                padding-top: 20px;
+                border-top: 1px solid #f0f2f5;
+            }
+            
+            .signature-name {
+                font-weight: 500;
+                color: #1a1a1a;
+                font-size: 16px;
+                margin-bottom: 4px;
+            }
+            
+            .signature-company {
+                color: #6b7280;
+                font-size: 14px;
+            }
+            
+            .footer {
+                background-color: #f8fafc;
+                padding: 20px 32px;
+                text-align: center;
+                border-top: 1px solid #f0f2f5;
+            }
+            
+            .footer-text {
+                font-size: 12px;
+                color: #9ca3af;
+                margin: 0;
+                line-height: 1.4;
+            }
+            
+            .cta-button {
+                display: inline-block;
+                background-color: #22c55e;
+                color: white;
+                padding: 12px 24px;
+                text-decoration: none;
+                border-radius: 6px;
+                font-weight: 500;
+                font-size: 15px;
+                margin: 16px 0;
+                transition: background-color 0.2s ease;
+            }
+            
+            .cta-button:hover {
+                background-color: #16a34a;
+            }
+            
+            @media (max-width: 600px) {
+                .email-container {
+                    margin: 0;
+                    border-radius: 0;
+                    border-left: none;
+                    border-right: none;
+                }
+                
+                .content {
+                    padding: 24px 20px;
+                }
+                
+                .header {
+                    padding: 20px;
+                }
+                
+                .logo-text {
+                    font-size: 20px;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="email-container">
+            <div class="header">
+                <div class="logo-container">
+                    <div class="logo-icon">🥗</div>
+                    <div class="logo-text">My-Dietitian</div>
+                </div>
+            </div>
+            
+            <div class="content">
+                <div class="greeting">Hi ${fullName},</div>
+                
+                <div class="message">
+                    <strong>Great news!</strong> We've received your assessment and found dietitians that are a perfect match for you, and accept your insurance.
+                </div>
+                
+                <div class="highlight-box">
+                    <p class="highlight-text">
+                        To move forward with scheduling your appointment, we just need to quickly verify your insurance details with your insurance provider. This will only take a moment and ensures everything is set up correctly for your first session.
+                    </p>
+                </div>
+                
+                <div class="next-steps">
+                    <div class="next-steps-title">What happens next</div>
+                    <div class="next-steps-text">
+                        We'll have you connected with your dietitian within 1-2 business days after verification is complete.
+                    </div>
+                </div>
+                
+                <div class="closing">
+                    We're excited to help you get started on your health journey!
+                </div>
+                
+                <div class="signature">
+                    <div class="signature-name">Best regards,</div>
+                    <div class="signature-name">The My-Dietitian Team</div>
+                    <div class="signature-company">My-Dietitian</div>
+                </div>
+            </div>
+            
+            <div class="footer">
+                <p class="footer-text">
+                    © 2025 My-Dietitian. All rights reserved.<br>
+                    Connecting you with registered dietitians covered by your benefits.
+                </p>
+            </div>
+        </div>
+    </body>
+    </html>
+    `;
+}
+
+async function sendCustomEmail(formData) {
+    console.log('🔄 Starting custom email send...');
+    try {
+        const userEmail = formData.get('email');
+        const userName = formData.get('name');
+        
+        console.log('📧 Email details:', {
+            to: userEmail,
+            from: "my.dietitian.ca@gmail.com",
+            subject: `Welcome to My-Dietitian, ${userName}! Your Assessment Received`
+        });
+        
+        console.log('⚙️ SMTP Config:', {
+            Host: SMTP_CONFIG.Host,
+            Username: SMTP_CONFIG.Username,
+            Port: SMTP_CONFIG.Port,
+            HasPassword: !!SMTP_CONFIG.Password
+        });
+
+        const emailBody = createEmailTemplate(formData);
+        console.log('📝 Email template created, length:', emailBody.length);
+
+        console.log('🚀 Attempting to send email via SMTP.js...');
+        
+        // Try SMTP.js with additional configuration for CORS
+        const result = await Email.send({
+            Host: SMTP_CONFIG.Host,
+            Username: SMTP_CONFIG.Username,
+            Password: SMTP_CONFIG.Password,
+            To: userEmail,
+            From: "my.dietitian.ca@gmail.com",
+            Subject: `Welcome to My-Dietitian, ${userName}! Your Assessment Received`,
+            Body: emailBody,
+            // Add these properties to help with CORS and ElasticEmail
+            SecureToken: SMTP_CONFIG.Password, // Some services prefer this over Password
+            Port: SMTP_CONFIG.Port,
+            EnableSSL: true,
+            // Additional headers that might help with CORS
+            Headers: {
+                'Content-Type': 'text/html; charset=utf-8',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        });
+
+        console.log('✅ Custom email sent successfully:', result);
+        return true;
+    } catch (error) {
+        console.error('❌ Custom email sending failed with details:', {
+            error: error,
+            message: error.message,
+            stack: error.stack,
+            name: error.name
+        });
+        
+        // Check if it's a CORS error specifically
+        if (error.message && error.message.toLowerCase().includes('cors')) {
+            console.error('🚫 CORS Error detected! This is a common issue with browser-based SMTP.');
+            console.log('💡 Possible solutions:');
+            console.log('1. Use SMTP.js secure token instead of direct SMTP');
+            console.log('2. Set up SMTP.js with a proxy service');
+            console.log('3. Use server-side email sending instead');
+        }
+        
+        // Store error in sessionStorage so it persists across redirects
+        sessionStorage.setItem('emailError', JSON.stringify({
+            message: error.message,
+            timestamp: new Date().toISOString(),
+            details: error.toString(),
+            isCorsError: error.message && error.message.toLowerCase().includes('cors')
+        }));
+        
+        throw error;
+    }
+}
 
 async function submitToSheetMonkey(formData) {
     try {
@@ -47,13 +375,15 @@ async function submitToFormspree(formData) {
 async function submitDualData(formData) {
     let sheetMonkeySuccess = false;
     let formspreeSuccess = false;
+    let customEmailSuccess = false;
     let errors = [];
 
-    // Try both submissions in parallel
+    // Try all three submissions in parallel
     try {
         await Promise.allSettled([
             submitToSheetMonkey(new FormData(document.getElementById('assessmentForm'))),
-            submitToFormspree(new FormData(document.getElementById('assessmentForm')))
+            submitToFormspree(new FormData(document.getElementById('assessmentForm'))),
+            sendCustomEmail(new FormData(document.getElementById('assessmentForm')))
         ]).then(results => {
             if (results[0].status === 'fulfilled') {
                 sheetMonkeySuccess = true;
@@ -68,9 +398,16 @@ async function submitDualData(formData) {
                 errors.push('Email notification failed');
                 console.error('Formspree failed:', results[1].reason);
             }
+
+            if (results[2].status === 'fulfilled') {
+                customEmailSuccess = true;
+            } else {
+                errors.push('Custom email failed');
+                console.error('Custom email failed:', results[2].reason);
+            }
         });
 
-        // Require at least one to succeed
+        // Require at least one submission to succeed
         if (!sheetMonkeySuccess && !formspreeSuccess) {
             throw new Error('Both database and email submissions failed');
         }
@@ -79,10 +416,11 @@ async function submitDualData(formData) {
             success: true,
             sheetMonkey: sheetMonkeySuccess,
             email: formspreeSuccess,
+            customEmail: customEmailSuccess,
             errors: errors
         };
     } catch (error) {
-        console.error('Dual submission failed:', error);
+        console.error('Submission failed:', error);
         throw error;
     }
 }
@@ -95,7 +433,7 @@ document.getElementById('assessmentForm').addEventListener('submit', async funct
     const benefitsSelect = document.getElementById('benefits');
     if (benefitsSelect && benefitsSelect.value === 'No') {
         // Redirect to Health811 page instead of submitting form
-        window.location.href = 'health811-redirect.html';
+        window.location.href = 'html/health811-redirect.html';
         return;
     }
     
@@ -193,11 +531,15 @@ document.getElementById('assessmentForm').addEventListener('submit', async funct
     try {
         // Submit to both SheetMonkey and Formspree
         const formData = new FormData(this);
+        console.log('📋 Form data collected, starting submission...');
+        
         const result = await submitDualData(formData);
+        console.log('🎯 Submission result:', result);
         
         // Show success message
         let successMessage = '✅ Your assessment has been submitted successfully!';
         if (result.errors.length > 0) {
+            console.warn('⚠️ Some submission errors occurred:', result.errors);
             successMessage += ' Note: ' + result.errors.join(', ') + '.';
         }
         
@@ -206,24 +548,50 @@ document.getElementById('assessmentForm').addEventListener('submit', async funct
         successDiv.textContent = successMessage;
         successDiv.style.display = 'block';
         
+        // Store success info in sessionStorage
+        sessionStorage.setItem('submissionSuccess', JSON.stringify({
+            timestamp: new Date().toISOString(),
+            sheetMonkey: result.sheetMonkey,
+            email: result.email,
+            customEmail: result.customEmail,
+            errors: result.errors
+        }));
+        
         // Redirect to thank you page after brief delay
         setTimeout(() => {
-            window.location.href = 'thank-you.html';
+            window.location.href = 'html/thank-you.html';
         }, 2000);
         
     } catch (error) {
+        console.error('💥 Form submission failed:', {
+            error: error,
+            message: error.message,
+            stack: error.stack
+        });
+        
+        // Store detailed error info
+        sessionStorage.setItem('submissionError', JSON.stringify({
+            message: error.message,
+            timestamp: new Date().toISOString(),
+            details: error.toString(),
+            stack: error.stack
+        }));
+        
         // Reset button state on error
         submitButton.disabled = false;
         submitButton.innerHTML = originalText;
         submitButton.classList.remove('loading');
         
-        // Show error message
+        // Show detailed error message
         const successDiv = document.getElementById('successMessage');
-        successDiv.textContent = '❌ There was an error submitting your information. Please try again.';
+        successDiv.textContent = `❌ Submission failed: ${error.message}. Please try again or contact support.`;
         successDiv.style.display = 'block';
         successDiv.style.background = '#fef2f2';
         successDiv.style.color = '#dc2626';
         successDiv.style.borderColor = '#fecaca';
+        
+        // Also alert the error so it doesn't disappear
+        alert(`Form submission failed: ${error.message}\n\nPlease check the console for more details and try again.`);
     }
 });
 
@@ -296,3 +664,70 @@ window.addEventListener('scroll', function() {
         header.style.background = 'rgba(255, 255, 255, 0.95)';
     }
 });
+
+// Debug function to test email sending
+function testEmailDebug() {
+    console.log('🧪 Running email debug test...');
+    
+    // Check if SMTP.js is loaded
+    if (typeof Email === 'undefined') {
+        console.error('❌ SMTP.js not loaded!');
+        alert('SMTP.js library not loaded. Check the script tag in index.html');
+        return;
+    }
+    
+    // Check if email config is available
+    if (typeof SMTP_CONFIG === 'undefined') {
+        console.error('❌ SMTP_CONFIG not defined!');
+        alert('Email configuration not loaded. Check email-config.js');
+        return;
+    }
+    
+    console.log('✅ SMTP.js and config loaded');
+    
+    // Create test form data
+    const testFormData = new FormData();
+    testFormData.append('name', 'Test User');
+    testFormData.append('email', 'test@example.com');
+    
+    // Test the email function
+    sendCustomEmail(testFormData)
+        .then(() => {
+            console.log('✅ Test email sent successfully');
+            alert('Test email sent successfully! Check the console for details.');
+        })
+        .catch((error) => {
+            console.error('❌ Test email failed:', error);
+            alert(`Test email failed: ${error.message}\nCheck the console for details.`);
+        });
+}
+
+// Test secure token approach
+function testSecureTokenEmail() {
+    console.log('🔐 Testing secure token email...');
+    
+    if (typeof sendEmailWithSecureToken === 'undefined') {
+        alert('Secure token function not available. Check email-config.js');
+        return;
+    }
+    
+    const testFormData = new FormData();
+    testFormData.append('name', 'Test User');
+    testFormData.append('email', 'test@example.com');
+    
+    sendEmailWithSecureToken(testFormData)
+        .then(() => {
+            console.log('✅ Secure token email sent successfully');
+            alert('Secure token email sent successfully!');
+        })
+        .catch((error) => {
+            console.error('❌ Secure token email failed:', error);
+            alert(`Secure token email failed: ${error.message}`);
+        });
+}
+
+// Debug panel removed for production
+
+// Make functions globally available for debugging
+window.testEmailDebug = testEmailDebug;
+window.testSecureTokenEmail = testSecureTokenEmail;

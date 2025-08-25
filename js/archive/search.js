@@ -184,7 +184,7 @@ document.getElementById('searchForm').addEventListener('submit', async function(
         
         // Redirect to results page after brief delay
         setTimeout(() => {
-            window.location.href = 'results.html?' + params.toString();
+            window.location.href = 'html/archive/results.html?' + params.toString();
         }, 1500);
         
     } catch (error) {

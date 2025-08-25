@@ -9,7 +9,7 @@ const countdownInterval = setInterval(() => {
     
     if (timeLeft <= 0) {
         clearInterval(countdownInterval);
-        window.location.href = 'https://mydietician.ca/';
+        window.location.href = '../index.html';
     }
 }, 1000);
 
@@ -18,3 +18,5 @@ document.addEventListener('click', () => {
     clearInterval(countdownInterval);
     countdown.style.display = 'none';
 });
+
+// Debug panel removed for production
