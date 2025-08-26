@@ -44,7 +44,7 @@ async function sendFormViaEmailJS(form, options = {}) {
         return emailjs.sendForm(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, form);
     }
 
-    // Option B: Send custom template parameters (using {{name}} and {{email}} variables)
+    // Option B: Send custom template parameters (sending TO the patient using {{email}})
     const templateParams = {
         name: formData.get('name') || '',
         email: formData.get('email') || '',
@@ -53,8 +53,13 @@ async function sendFormViaEmailJS(form, options = {}) {
         benefits: formData.get('benefits') || '',
         member_id: formData.get('member-id') || '',
         health_goals: Array.from(formData.getAll('health_goals[]')).join(', '),
-        message: options.message || 'New My-Dietitian assessment submission',
+        message: options.message || 'Thank you for submitting your My-Dietitian assessment',
         timestamp: new Date().toLocaleString(),
+        // Patient-specific template variables
+        patient_name: formData.get('name') || '',
+        patient_email: formData.get('email') || '',
+        dietitian_name: options.dietitianName || '[Dietitian Name]',
+        your_name: options.yourName || 'My-Dietitian Team',
         // Additional fields can be added here
         ...options.templateParams
     };
@@ -88,7 +93,7 @@ async function sendFormViaEmailJS(form, options = {}) {
  */
 async function sendContactForm(form) {
     return sendFormViaEmailJS(form, {
-        message: 'New My-Dietitian assessment submission',
+        message: 'Thank you for submitting your My-Dietitian assessment',
         includeHtmlTemplate: true,
         templatePath: '/email_templates/book_appointment.html'
     });
@@ -109,9 +114,11 @@ async function testEmailJSConfig() {
     testData.set('health_goals[]', 'Weight Loss');
 
     return sendFormViaEmailJS(testData, {
-        message: 'EmailJS Configuration Test',
+        message: 'Welcome to My-Dietitian! Thank you for your test submission.',
         templateParams: {
-            test_mode: true
+            test_mode: true,
+            dietitian_name: 'Dr. Test Nutritionist',
+            your_name: 'My-Dietitian Team'
         }
     });
 }
