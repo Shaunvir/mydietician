@@ -41,12 +41,7 @@
         .logo-icon {
             width: 48px;
             height: 48px;
-            background-color: #22c55e;
             border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
         }
         
         .logo-text {
@@ -74,47 +69,84 @@
             margin-bottom: 20px;
         }
         
-        .message strong {
-            color: #22c55e;
-            font-weight: 600;
-        }
-        
-        .highlight-box {
+        .cta-section {
             background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
             border: 1px solid #bbf7d0;
             border-radius: 8px;
-            padding: 20px;
+            padding: 24px;
             margin: 24px 0;
+            text-align: center;
         }
         
-        .highlight-text {
-            font-size: 15px;
+        .cta-title {
+            font-size: 18px;
+            font-weight: 600;
             color: #166534;
-            margin: 0;
-            line-height: 1.5;
+            margin-bottom: 12px;
         }
         
-        .next-steps {
+        .cta-subtitle {
+            font-size: 14px;
+            color: #166534;
+            margin-bottom: 20px;
+            opacity: 0.8;
+        }
+        
+        .cta-button {
+            display: inline-block;
+            background-color: #22c55e;
+            color: white;
+            padding: 14px 28px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 16px;
+            transition: background-color 0.2s ease;
+        }
+        
+        .cta-button:hover {
+            background-color: #16a34a;
+        }
+        
+        .infographic-section {
             background-color: #f8fafc;
             border-radius: 8px;
-            padding: 20px;
+            padding: 24px;
             margin: 24px 0;
             border-left: 4px solid #22c55e;
         }
         
-        .next-steps-title {
-            font-size: 14px;
+        .infographic-title {
+            font-size: 16px;
             font-weight: 600;
-            color: #374151;
-            margin-bottom: 8px;
-            text-transform: uppercase;
-            letter-spacing: 0.025em;
+            color: #1a1a1a;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
         
-        .next-steps-text {
+        .infographic-text {
             font-size: 15px;
             color: #4b5563;
-            margin: 0;
+            margin-bottom: 16px;
+            line-height: 1.5;
+        }
+        
+        .feedback-request {
+            background-color: #fef3c7;
+            border: 1px solid #fbbf24;
+            border-radius: 6px;
+            padding: 12px 16px;
+            font-size: 14px;
+            color: #92400e;
+            font-weight: 500;
+        }
+        
+        .divider {
+            height: 1px;
+            background: linear-gradient(to right, transparent, #e5e7eb, transparent);
+            margin: 32px 0;
         }
         
         .closing {
@@ -155,23 +187,6 @@
             line-height: 1.4;
         }
         
-        .cta-button {
-            display: inline-block;
-            background-color: #22c55e;
-            color: white;
-            padding: 12px 24px;
-            text-decoration: none;
-            border-radius: 6px;
-            font-weight: 500;
-            font-size: 15px;
-            margin: 16px 0;
-            transition: background-color 0.2s ease;
-        }
-        
-        .cta-button:hover {
-            background-color: #16a34a;
-        }
-        
         @media (max-width: 600px) {
             .email-container {
                 margin: 0;
@@ -191,6 +206,10 @@
             .logo-text {
                 font-size: 20px;
             }
+            
+            .cta-section, .infographic-section {
+                padding: 20px 16px;
+            }
         }
     </style>
 </head>
@@ -198,7 +217,7 @@
     <div class="email-container">
         <div class="header">
             <div class="logo-container">
-                <img src="https://lh3.googleusercontent.com/d/1j9gyaEzWRHUOjHHEAZ21HXb0yCv2eVNP=w300-h300">
+                <img src="https://lh3.googleusercontent.com/d/10WC9NeBizz2ZnHvHJNyluAvQiTLnxqKl=w300-h300" alt="My-Dietitian Logo">
             </div>
         </div>
         
@@ -206,28 +225,35 @@
             <div class="greeting">Hi [Patient Name],</div>
             
             <div class="message">
-                <strong>Great news!</strong> We've found a dietitian that's a perfect match for you, and accepts your insurance.
+                I hope your appointment with us went well and that you found it helpful!
             </div>
             
-            <div class="highlight-box">
-                <p class="highlight-text">
-                    To move forward with scheduling your appointment, we just need to quickly verify your insurance details with your insurance provider. This will only take a moment and ensures everything is set up correctly for your first session.
-                </p>
+            <div class="cta-section">
+                <div class="cta-title">Ready for your next session?</div>
+                <div class="cta-subtitle">Continue your health journey with a follow-up appointment</div>
+                <a href="[CALENDLY_LINK]" class="cta-button">Book Your Follow-up</a>
             </div>
             
-            <div class="next-steps">
-                <div class="next-steps-title">What happens next</div>
-                <div class="next-steps-text">
-                    We'll have you connected with your dietitian within 1-2 business days after verification is complete.
+            <div class="divider"></div>
+            
+            <div class="infographic-section">
+                <div class="infographic-title">
+                    📊 Something special for you
+                </div>
+                <div class="infographic-text">
+                    We're experimenting with creating personalized infographics based on your appointment notes to help you better understand and remember the key points from your visit. I've attached them to this email.
+                </div>
+                <div class="feedback-request">
+                    We'd love your feedback on whether you like them and found them helpful!
                 </div>
             </div>
             
             <div class="closing">
-                We're excited to help you get started on your health journey!
+                We're excited to continue working with you!
             </div>
             
             <div class="signature">
-                <div class="signature-name">Best regards,</div>
+                <div class="signature-name">Thanks,</div>
                 <div class="signature-name">[Your Name]</div>
                 <div class="signature-company">My-Dietitian</div>
             </div>
