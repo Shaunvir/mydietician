@@ -5,9 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My-Dietitian - Connect with Dietitians Covered By Insurance </title>
     <link rel="stylesheet" href="css/main.css">
-    
-    <!-- EmailJS CDN -->
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 </head>
 <body>
     <!-- Header -->
@@ -123,162 +120,9 @@
                 <p class="section-subtitle">Complete this quick assessment to connect with a registered Dietitian</p>
             </div>
             
-            <div class="form-container">
-                <div class="success-message" id="successMessage">
-                    ✅ Thanks! We'll get back to you in 3-5 business days!
-                </div>
-                
-                <form id="assessmentForm" action="https://formspree.io/f/xeozkgvr" method="POST">
-                    <!-- Formspree configuration -->
-                    <input type="hidden" name="_subject" value="New My-Dietitian Assessment Submission">
-                        <input type="hidden" name="_next" value="html/thank-you.html">
-                    <input type="hidden" name="_autoresponse" value="Thanks! We received your assessment and will get back to you within 5 business days. A registered Dietitian from our team will be in touch soon to help you achieve your health goals.">
-                    <input type="hidden" name="_captcha" value="false">
-                    
-                    <div class="form-group">
-                        <label for="name">Full Name *</label>
-                        <input type="text" id="name" name="name" required>
-                        <div class="error" id="nameError"></div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="email">Email Address *</label>
-                        <input type="email" id="email" name="email" required>
-                        <div class="error" id="emailError"></div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="phone">Phone Number *</label>
-                        <input type="tel" id="phone" name="phone" placeholder="(___) ___-____" required>
-                        <div class="error" id="phoneError"></div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="province">Province of Residence *</label>
-                        <select id="province" name="province" required>
-                            <option value="">Select your province</option>
-                            <option value="Alberta">Alberta</option>
-                            <option value="British Columbia">British Columbia</option>
-                            <option value="Manitoba">Manitoba</option>
-                            <option value="New Brunswick">New Brunswick</option>
-                            <option value="Newfoundland and Labrador">Newfoundland and Labrador</option>
-                            <option value="Nova Scotia">Nova Scotia</option>
-                            <option value="Ontario">Ontario</option>
-                            <option value="Prince Edward Island">Prince Edward Island</option>
-                            <option value="Quebec">Quebec</option>
-                            <option value="Saskatchewan">Saskatchewan</option>
-                            <option value="Northwest Territories">Northwest Territories</option>
-                            <option value="Nunavut">Nunavut</option>
-                            <option value="Yukon">Yukon</option>
-                        </select>
-                        <div class="error" id="provinceError"></div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="benefits">Do you have employer health benefits? *</label>
-                        <select id="benefits" name="benefits" required>
-                            <option value="">Please select</option>
-                            <option value="Yes">Yes</option>
-                            <option value="No">No</option>
-                            <option value="Unsure">Unsure</option>
-                        </select>
-                        <div class="error" id="benefitsError"></div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="insurer">Insurance Provider (if known)</label>
-                        <select id="insurer" name="insurer">
-                            <option value="">Select your insurer</option>
-                            <option value="Canada Life">Canada Life</option>
-                            <option value="Sun Life Financial">Sun Life Financial</option>
-                            <option value="Manulife">Manulife</option>
-                            <option value="Great-West Life">Great-West Life</option>
-                            <option value="Blue Cross">Blue Cross</option>
-                            <option value="Chambers of Commerce Group Insurance">Chambers of Commerce Group Insurance</option>
-                            <option value="Desjardins Insurance">Desjardins Insurance</option>
-                            <option value="Industrial Alliance">Industrial Alliance</option>
-                            <option value="Other">Other</option>
-                            <option value="Don't know">Don't know</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="member-id">Member ID *</label>
-                        <input type="text" id="member-id" name="member_id" placeholder="From your benefits card" required>
-                        <div class="error" id="memberIdError"></div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="group-number">Group Number (if applicable)</label>
-                        <input type="text" id="group-number" name="group_number" placeholder="Optional - if shown on your card">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="referred-by">Referred by (optional)</label>
-                        <input type="text" id="referred-by" name="referred_by" placeholder="e.g. Dr. Smith's Clinic, Toronto Wellness Center">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Primary Health Goals * (Select all that apply)</label>
-                        <div class="checkbox-grid">
-                            <div class="checkbox-item">
-                                <input type="checkbox" id="injury" name="health_goals[]" value="Injury Recovery">
-                                <label for="injury">Injury Recovery</label>
-                            </div>
-                            <div class="checkbox-item">
-                                <input type="checkbox" id="weight" name="health_goals[]" value="Weight Management">
-                                <label for="weight">Weight Management</label>
-                            </div>
-                            <div class="checkbox-item">
-                                <input type="checkbox" id="diabetes" name="health_goals[]" value="Diabetes Management">
-                                <label for="diabetes">Diabetes Management</label>
-                            </div>
-                            <div class="checkbox-item">
-                                <input type="checkbox" id="heart" name="health_goals[]" value="Heart Health">
-                                <label for="heart">Heart Health</label>
-                            </div>
-                            <div class="checkbox-item">
-                                <input type="checkbox" id="gut" name="health_goals[]" value="Gut Health">
-                                <label for="gut">Gut Health</label>
-                            </div>
-                            <div class="checkbox-item">
-                                <input type="checkbox" id="wellness" name="health_goals[]" value="General Wellness">
-                                <label for="wellness">General Wellness</label>
-                            </div>
-                            <div class="checkbox-item">
-                                <input type="checkbox" id="sports" name="health_goals[]" value="Sports Nutrition">
-                                <label for="sports">Sports Nutrition</label>
-                            </div>
-                            <div class="checkbox-item">
-                                <input type="checkbox" id="oral" name="health_goals[]" value="Oral Health">
-                                <label for="oral">Oral Health</label>
-                            </div>
-                        </div>
-                        <div class="error" id="goalsError"></div>
-                    </div>
-                    
-                    <!-- <div class="form-group">
-                        <label for="consultation-type">Preferred Consultation Type *</label>
-                        <select id="consultation-type" name="consultation_type" required>
-                            <option value="">Select preference</option>
-                            <option value="Video Call">Video Call</option>
-                            <option value="Phone Call">Phone Call</option>
-                            <option value="In-Person (if available)">In-Person (if available)</option>
-                            <option value="Flexible - any option">Flexible - any option</option>
-                        </select>
-                        <div class="error" id="consultationTypeError"></div>
-                    </div> -->
-                    
-                    <div class="form-group">
-                        <label for="description">Brief description of what you're looking for</label>
-                        <textarea id="description" name="description" rows="4" placeholder="Tell us about your nutrition goals, any specific concerns, or what you hope to achieve..."></textarea>
-                    </div>
-                    
-                    <button type="submit" class="cta-primary submit-button" style="width: 100%; justify-content: center;" id="submitButton">
-                        Get Matched with a Dietitian
-                        <span>→</span>
-                    </button>
-                </form>
+            <div class="google-form-container">
+                <div id="ff-compose"></div>
+                <script async defer src="https://formfacade.com/include/109651133322997016304/form/1FAIpQLSdJZNTZ_tnBAs-xZnh1E2JeYXZDXvkHNv2GwCQaAhvgruCMrw/classic.js?div=ff-compose"></script>
             </div>
         </div>
     </section>
@@ -328,17 +172,7 @@
         </div>
     </section>
 
-    <script src="js/email-config.js"></script>
-    <script src="js/emailjs-send.js"></script>
-    <script>
-        // Initialize EmailJS with your public key (current SDK v4 syntax)
-        (function(){
-            emailjs.init({
-              publicKey: "6fXer2OnVAybIBX6Y",
-            });
-        })();
-        console.log('✅ EmailJS initialized successfully');
-    </script>
+    <!-- Note: EmailJS scripts removed as Google Forms handles form submission -->
     <script src="js/main.js"></script>
 </body>
 </html>
