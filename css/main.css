@@ -318,11 +318,27 @@ body {
 #ff-compose button {
     background: #16a34a !important;
     background-color: #16a34a !important;
+    color: white !important;
 }
 
 #ff-compose button:hover {
     background: #15803d !important;
     background-color: #15803d !important;
+    color: white !important;
+}
+
+/* Hide Formfacade watermark */
+#ff-compose .ff-footer,
+#ff-compose .formfacade-footer,
+#ff-compose .powered-by,
+#ff-compose [class*="powered"],
+#ff-compose [class*="watermark"],
+#ff-compose [class*="footer"] {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
 }
 
 .google-form-iframe {
