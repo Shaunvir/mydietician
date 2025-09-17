@@ -11,7 +11,7 @@ function startCountdown() {
         
         if (timeLeft <= 0) {
             clearInterval(countdownInterval);
-            window.location.href = 'http://health811.ontario.ca/';
+            window.location.href = 'https://health811.ontario.ca/';
         }
     }, 1000);
 }
