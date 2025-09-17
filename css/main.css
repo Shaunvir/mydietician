@@ -64,7 +64,7 @@ body {
     background: url('../HeroImage.png');
     background-size: cover;
     background-position: center;
-    background-attachment: fixed;
+    background-repeat: no-repeat;
     padding: 120px 0 80px;
     color: white;
     position: relative;

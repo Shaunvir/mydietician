@@ -3,7 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My-Dietitian - Connect with Dietitians Covered By Insurance </title>
+    <title>My-Dietitian - Connect with Dietitians Covered By Insurance</title>
+    <meta name="description" content="Connect with registered dietitians in Canada covered by your employer health benefits. Get professional nutrition guidance at no out-of-pocket cost through My-Dietitian.">
+    <meta name="keywords" content="dietitian, nutrition, health benefits, Canada, insurance covered, registered dietitian, nutrition counseling, health goals">
+    <meta name="author" content="My-Dietitian">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://mydietician.ca/">
+    <meta property="og:title" content="My-Dietitian - Connect with Dietitians Covered By Insurance">
+    <meta property="og:description" content="Connect with registered dietitians in Canada covered by your employer health benefits. Get professional nutrition guidance at no out-of-pocket cost.">
+    <meta property="og:image" content="https://mydietician.ca/HeroImage.png">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://mydietician.ca/">
+    <meta property="twitter:title" content="My-Dietitian - Connect with Dietitians Covered By Insurance">
+    <meta property="twitter:description" content="Connect with registered dietitians in Canada covered by your employer health benefits. Get professional nutrition guidance at no out-of-pocket cost.">
+    <meta property="twitter:image" content="https://mydietician.ca/HeroImage.png">
+    
     <link rel="stylesheet" href="css/main.css">
 </head>
 <body>
@@ -121,42 +139,42 @@
             </div>
             
             <div class="form-container">
-                <form id="assessmentForm">
-                    <div id="successMessage" style="display: none; padding: 16px; margin-bottom: 24px; background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; border-radius: 8px;"></div>
+                <form id="assessmentForm" role="form" aria-label="Dietitian Assessment Form">
+                    <div id="successMessage" style="display: none; padding: 16px; margin-bottom: 24px; background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; border-radius: 8px;" role="alert" aria-live="polite"></div>
                     
                     <div class="form-group">
                         <label for="first-name">First Name*</label>
-                        <input type="text" id="first-name" name="first_name" required placeholder="Enter your first name">
-                        <div id="firstNameError" class="error"></div>
+                        <input type="text" id="first-name" name="first_name" required placeholder="Enter your first name" aria-describedby="firstNameError">
+                        <div id="firstNameError" class="error" role="alert" aria-live="polite"></div>
                     </div>
 
                     <div class="form-group">
                         <label for="last-name">Last Name*</label>
-                        <input type="text" id="last-name" name="last_name" required placeholder="Enter your last name">
-                        <div id="lastNameError" class="error"></div>
+                        <input type="text" id="last-name" name="last_name" required placeholder="Enter your last name" aria-describedby="lastNameError">
+                        <div id="lastNameError" class="error" role="alert" aria-live="polite"></div>
                     </div>
 
                     <div class="form-group">
                         <label for="date-of-birth">Date of Birth*</label>
-                        <input type="date" id="date-of-birth" name="date_of_birth" required>
-                        <div id="dateOfBirthError" class="error"></div>
+                        <input type="date" id="date-of-birth" name="date_of_birth" required aria-describedby="dateOfBirthError">
+                        <div id="dateOfBirthError" class="error" role="alert" aria-live="polite"></div>
                     </div>
 
                     <div class="form-group">
                         <label for="email">Email Address*</label>
-                        <input type="email" id="email" name="email" required placeholder="Enter your email address">
-                        <div id="emailError" class="error"></div>
+                        <input type="email" id="email" name="email" required placeholder="Enter your email address" aria-describedby="emailError">
+                        <div id="emailError" class="error" role="alert" aria-live="polite"></div>
                     </div>
 
                     <div class="form-group">
                         <label for="phone">Phone Number*</label>
-                        <input type="tel" id="phone" name="phone" required placeholder="(___) ___-____">
-                        <div id="phoneError" class="error"></div>
+                        <input type="tel" id="phone" name="phone" required placeholder="(___) ___-____" aria-describedby="phoneError">
+                        <div id="phoneError" class="error" role="alert" aria-live="polite"></div>
                     </div>
 
                     <div class="form-group">
                         <label for="province">Province*</label>
-                        <select id="province" name="province" required>
+                        <select id="province" name="province" required aria-describedby="provinceError">
                             <option value="">Select your province</option>
                             <option value="Alberta">Alberta</option>
                             <option value="British Columbia">British Columbia</option>
@@ -172,17 +190,17 @@
                             <option value="Nunavut">Nunavut</option>
                             <option value="Yukon">Yukon</option>
                         </select>
-                        <div id="provinceError" class="error"></div>
+                        <div id="provinceError" class="error" role="alert" aria-live="polite"></div>
                     </div>
 
                     <div class="form-group">
                         <label for="benefits">Do you have employer health benefits that might cover Dietitian services?*</label>
-                        <select id="benefits" name="benefits" required>
+                        <select id="benefits" name="benefits" required aria-describedby="benefitsError">
                             <option value="">Please select</option>
                             <option value="Yes">Yes, I have employer health benefits</option>
                             <option value="No">No, I don't have employer health benefits</option>
                         </select>
-                        <div id="benefitsError" class="error"></div>
+                        <div id="benefitsError" class="error" role="alert" aria-live="polite"></div>
                     </div>
 
                     <div class="form-group insurance-details-group" id="insurance-group">
@@ -225,9 +243,9 @@
                         <small style="color: #6b7280; font-size: 12px; margin-top: 4px; display: block;">Only if your policy number is different from your member ID</small>
                     </div>
 
-                    <div class="form-group">
-                        <label>What are your main health goals? (Select all that apply)*</label>
-                        <div class="checkbox-grid">
+                    <fieldset class="form-group">
+                        <legend>What are your main health goals? (Select all that apply)*</legend>
+                        <div class="checkbox-grid" role="group" aria-describedby="goalsError">
                             <div class="checkbox-item">
                                 <input type="checkbox" id="goal-weight" name="health_goals[]" value="Weight Management">
                                 <label for="goal-weight">Weight Management</label>
@@ -269,8 +287,8 @@
                                 <label for="goal-general">General Nutrition</label>
                             </div>
                         </div>
-                        <div id="goalsError" class="error"></div>
-                    </div>
+                        <div id="goalsError" class="error" role="alert" aria-live="polite"></div>
+                    </fieldset>
 
                     <div class="form-group">
                         <label for="referred-by">Referring Doctor/Healthcare Provider (Optional)</label>
@@ -299,7 +317,7 @@
     <section class="trust">
         <div class="container">
             <div class="section-header">
-                <h2 class="section-title">Accepted by millions of Canadian's benefits plans</h2>
+                <h2 class="section-title">Accepted by millions of Canadians' benefits plans</h2>
                 <p class="section-subtitle">Join the growing community of people improving their health with professional nutrition guidance</p>
             </div>
             
