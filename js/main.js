@@ -2,7 +2,11 @@
 const SHEET_MONKEY_URL = 'https://api.sheetmonkey.io/form/9MoRQbyaVfkrCsZGZW3Mt2';
 const FORMSPREE_URL = 'https://formspree.io/f/xeozkgvr';
 
-// Email template function
+/**
+ * Creates a professional HTML email template for My-Dietitian submissions
+ * @param {FormData} formData - The form data containing user information
+ * @returns {string} Complete HTML email template with inline styles
+ */
 function createEmailTemplate(formData) {
     const firstName = formData.get('first_name') || '';
     const lastName = formData.get('last_name') || '';
@@ -257,6 +261,12 @@ function createEmailTemplate(formData) {
     `;
 }
 
+/**
+ * Sends custom email using EmailJS service
+ * @param {FormData} formData - The form data to send via email
+ * @returns {Promise<boolean>} True if email sent successfully, throws error if failed
+ * @throws {Error} When EmailJS is not configured or send fails
+ */
 async function sendCustomEmail(formData) {
     console.log('🔄 Starting custom email send...');
     // EmailJS-only send path
@@ -282,6 +292,12 @@ async function sendCustomEmail(formData) {
     }
 }
 
+/**
+ * Submits form data to SheetMonkey for database storage
+ * @param {FormData} formData - The form data to submit
+ * @returns {Promise<boolean>} True if submission successful
+ * @throws {Error} When submission fails or HTTP error occurs
+ */
 async function submitToSheetMonkey(formData) {
     try {
         const response = await fetch(SHEET_MONKEY_URL, {
@@ -301,6 +317,12 @@ async function submitToSheetMonkey(formData) {
     }
 }
 
+/**
+ * Submits form data to Formspree for email notifications
+ * @param {FormData} formData - The form data to submit
+ * @returns {Promise<boolean>} True if submission successful
+ * @throws {Error} When submission fails or HTTP error occurs
+ */
 async function submitToFormspree(formData) {
     try {
         // Add Formspree configuration fields
@@ -326,6 +348,17 @@ async function submitToFormspree(formData) {
 
 
 
+/**
+ * Submits form data to multiple services in parallel with error handling
+ * @param {FormData} formData - The form data to submit to all services
+ * @returns {Promise<Object>} Object containing success status and service results
+ * @property {boolean} success - True if at least one service succeeded
+ * @property {boolean} sheetMonkey - SheetMonkey submission result
+ * @property {boolean} email - Formspree submission result  
+ * @property {boolean} customEmail - EmailJS submission result
+ * @property {string[]} errors - Array of error messages for failed services
+ * @throws {Error} When all services fail to submit
+ */
 async function submitDualData(formData) {
     let sheetMonkeySuccess = false;
     let formspreeSuccess = false;
@@ -379,24 +412,19 @@ async function submitDualData(formData) {
     }
 }
 
-// Simplified form validation that works with dual submission
-document.getElementById('assessmentForm').addEventListener('submit', async function(e) {
-    e.preventDefault(); // Always prevent default to handle with dual submission
-    
-    // Check if user selected "No" for insurance benefits
-    const benefitsSelect = document.getElementById('benefits');
-    if (benefitsSelect && benefitsSelect.value === 'No') {
-        // Redirect to Health811 page instead of submitting form
-        window.location.href = 'html/health811-redirect.html';
-        return;
-    }
+/**
+ * Validates required form fields based on current form state
+ * @param {boolean} hasBenefits - Whether user has insurance benefits
+ * @returns {Object} Validation result with isValid boolean and errors array
+ */
+function validateFormFields(hasBenefits) {
+    const errors = [];
+    let isValid = true;
     
     // Clear previous errors
     document.querySelectorAll('.error').forEach(error => error.textContent = '');
     
-    let isValid = true;
-    
-    // Validate required fields
+    // Define required fields
     const requiredFields = [
         {id: 'first-name', error: 'firstNameError', message: 'First name is required'},
         {id: 'last-name', error: 'lastNameError', message: 'Last name is required'},
@@ -407,9 +435,8 @@ document.getElementById('assessmentForm').addEventListener('submit', async funct
         {id: 'benefits', error: 'benefitsError', message: 'Benefits information is required'}
     ];
 
-    // Add insurance fields to validation if benefits = "Yes"
-    const benefitsValue = document.getElementById('benefits')?.value;
-    if (benefitsValue === 'Yes') {
+    // Add insurance fields if benefits = "Yes"
+    if (hasBenefits) {
         requiredFields.push(
             {id: 'insurance', error: 'insuranceError', message: 'Insurance provider is required'},
             {id: 'member-id', error: 'memberIdError', message: 'Member ID is required'},
@@ -417,18 +444,16 @@ document.getElementById('assessmentForm').addEventListener('submit', async funct
         );
     }
     
+    // Validate required fields
     requiredFields.forEach(field => {
         const input = document.getElementById(field.id);
         const errorElement = document.getElementById(field.error);
-        
-        console.log(`Validating field: ${field.id}, element:`, input, `type: ${input?.type}, value:`, input?.value);
         
         if (!input) {
             console.error(`Form validation error: Element with ID '${field.id}' not found`);
             return;
         }
         
-        // Simple validation - check if field has a value
         let isEmpty = false;
         if (input.type === 'checkbox') {
             isEmpty = !input.checked;
@@ -443,36 +468,66 @@ document.getElementById('assessmentForm').addEventListener('submit', async funct
                 errorElement.textContent = field.message;
             }
             isValid = false;
+            errors.push(field.message);
         }
     });
     
+    return { isValid, errors };
+}
+
+/**
+ * Validates email format using standard regex
+ * @param {string} email - Email address to validate
+ * @returns {boolean} True if email format is valid
+ */
+function validateEmailFormat(email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+}
+
+/**
+ * Validates Canadian phone number format
+ * @param {string} phone - Phone number to validate
+ * @returns {boolean} True if phone format is valid
+ */
+function validatePhoneFormat(phone) {
+    const phoneRegex = /^\(\d{3}\) \d{3}-\d{4}$/;
+    return phoneRegex.test(phone);
+}
+
+/**
+ * Performs comprehensive form validation
+ * @returns {boolean} True if all validation passes
+ */
+function performFormValidation() {
+    const benefitsValue = document.getElementById('benefits')?.value;
+    const hasBenefits = benefitsValue === 'Yes';
+    
+    // Validate required fields
+    const fieldValidation = validateFormFields(hasBenefits);
+    let isValid = fieldValidation.isValid;
+    
     // Validate email format
     const emailElement = document.getElementById('email');
-    if (emailElement && emailElement.value) {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(emailElement.value)) {
-            const emailError = document.getElementById('emailError');
-            if (emailError) {
-                emailError.textContent = 'Please enter a valid email address';
-            }
-            isValid = false;
+    if (emailElement && emailElement.value && !validateEmailFormat(emailElement.value)) {
+        const emailError = document.getElementById('emailError');
+        if (emailError) {
+            emailError.textContent = 'Please enter a valid email address';
         }
+        isValid = false;
     }
     
-    // Validate phone number format
+    // Validate phone format  
     const phoneElement = document.getElementById('phone');
-    if (phoneElement && phoneElement.value) {
-        const phoneRegex = /^\(\d{3}\) \d{3}-\d{4}$/;
-        if (!phoneRegex.test(phoneElement.value)) {
-            const phoneError = document.getElementById('phoneError');
-            if (phoneError) {
-                phoneError.textContent = 'Please enter a valid Canadian phone number: (___) ___-____';
-            }
-            isValid = false;
+    if (phoneElement && phoneElement.value && !validatePhoneFormat(phoneElement.value)) {
+        const phoneError = document.getElementById('phoneError');
+        if (phoneError) {
+            phoneError.textContent = 'Please enter a valid Canadian phone number: (___) ___-____';
         }
+        isValid = false;
     }
     
-    // Validate health goals (at least one must be selected)
+    // Validate health goals
     const goals = document.querySelectorAll('input[name="health_goals[]"]:checked');
     if (goals.length === 0) {
         const goalsError = document.getElementById('goalsError');
@@ -482,88 +537,139 @@ document.getElementById('assessmentForm').addEventListener('submit', async funct
         isValid = false;
     }
     
-    if (!isValid) {
-        return false;
-    }
-    
-    // If validation passes, show loading state and submit to services
-    const submitButton = document.getElementById('submitButton');
-    const originalText = submitButton.innerHTML;
-    submitButton.classList.add('loading');
-    submitButton.innerHTML = 'Submitting...';
-    submitButton.disabled = true;
+    return isValid;
+}
+
+/**
+ * Handles form submission with error boundaries and validation
+ * @param {Event} e - Form submit event
+ */
+async function handleFormSubmission(e) {
+    e.preventDefault();
     
     try {
-        // Submit to both SheetMonkey and email services
-        const formData = new FormData(this);
-        console.log('📋 Form data collected, starting submission...');
-        
-        const result = await submitDualData(formData);
-        console.log('🎯 Submission result:', result);
-        
-        // Show success message
-        let successMessage = '✅ Your assessment has been submitted successfully!';
-        if (result.errors.length > 0) {
-            console.warn('⚠️ Some submission errors occurred:', result.errors);
-            successMessage += ' Note: ' + result.errors.join(', ') + '.';
+        // Check for insurance redirect
+        const benefitsSelect = document.getElementById('benefits');
+        if (benefitsSelect && benefitsSelect.value === 'No') {
+            window.location.href = 'html/health811-redirect.html';
+            return;
         }
         
-        // Show success message in the form
-        const successDiv = document.getElementById('successMessage');
-        successDiv.innerHTML = successMessage;
-        successDiv.style.display = 'block';
-        successDiv.style.background = '#f0fdf4';
-        successDiv.style.color = '#15803d';
-        successDiv.style.borderColor = '#bbf7d0';
+        // Validate form
+        if (!performFormValidation()) {
+            return false;
+        }
         
-        // Store success info in sessionStorage
-        sessionStorage.setItem('submissionSuccess', JSON.stringify({
-            timestamp: new Date().toISOString(),
-            sheetMonkey: result.sheetMonkey,
-            email: result.email,
-            customEmail: result.customEmail,
-            errors: result.errors
-        }));
+        // Show loading state
+        const submitButton = document.getElementById('submitButton');
+        const originalText = submitButton.innerHTML;
+        submitButton.classList.add('loading');
+        submitButton.innerHTML = 'Submitting...';
+        submitButton.disabled = true;
         
-        // Redirect to thank you page after brief delay
-        setTimeout(() => {
-            window.location.href = 'html/thank-you.html';
-        }, 2000);
+        try {
+            // Submit to services
+            const formData = new FormData(e.target);
+            console.log('📋 Form data collected, starting submission...');
+            
+            const result = await submitDualData(formData);
+            console.log('🎯 Submission result:', result);
+            
+            // Handle success
+            handleSubmissionSuccess(result);
+            
+        } catch (error) {
+            // Handle submission error
+            handleSubmissionError(error, submitButton, originalText);
+        }
         
     } catch (error) {
-        console.error('💥 Form submission failed:', {
-            error: error,
-            message: error.message,
-            stack: error.stack
-        });
-        
-        // Store detailed error info
-        sessionStorage.setItem('submissionError', JSON.stringify({
-            message: error.message,
-            timestamp: new Date().toISOString(),
-            details: error.toString(),
-            stack: error.stack
-        }));
-        
-        // Reset button state on error
-        submitButton.disabled = false;
-        submitButton.innerHTML = originalText;
-        submitButton.classList.remove('loading');
-        
-        // Show error message
+        // Handle unexpected errors
+        console.error('💥 Unexpected error in form submission:', error);
         const successDiv = document.getElementById('successMessage');
-        let errorMessage = `❌ Submission failed: ${error.message}. Please try again or contact support.`;
-        
-        successDiv.innerHTML = errorMessage.replace(/\n/g, '<br>');
+        successDiv.innerHTML = '❌ An unexpected error occurred. Please refresh and try again.';
         successDiv.style.display = 'block';
         successDiv.style.background = '#fef2f2';
         successDiv.style.color = '#dc2626';
         successDiv.style.borderColor = '#fecaca';
-        
-        // Scroll to error message
-        successDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
-});
+}
+
+/**
+ * Handles successful form submission
+ * @param {Object} result - Submission result object
+ */
+function handleSubmissionSuccess(result) {
+    let successMessage = '✅ Your assessment has been submitted successfully!';
+    if (result.errors.length > 0) {
+        console.warn('⚠️ Some submission errors occurred:', result.errors);
+        successMessage += ' Note: ' + result.errors.join(', ') + '.';
+    }
+    
+    const successDiv = document.getElementById('successMessage');
+    successDiv.innerHTML = successMessage;
+    successDiv.style.display = 'block';
+    successDiv.style.background = '#f0fdf4';
+    successDiv.style.color = '#15803d';
+    successDiv.style.borderColor = '#bbf7d0';
+    
+    // Store success info
+    sessionStorage.setItem('submissionSuccess', JSON.stringify({
+        timestamp: new Date().toISOString(),
+        sheetMonkey: result.sheetMonkey,
+        email: result.email,
+        customEmail: result.customEmail,
+        errors: result.errors
+    }));
+    
+    // Redirect after delay
+    setTimeout(() => {
+        window.location.href = 'html/thank-you.html';
+    }, 2000);
+}
+
+/**
+ * Handles form submission errors with user feedback
+ * @param {Error} error - The error that occurred
+ * @param {HTMLElement} submitButton - Submit button element
+ * @param {string} originalText - Original button text
+ */
+function handleSubmissionError(error, submitButton, originalText) {
+    console.error('💥 Form submission failed:', {
+        error: error,
+        message: error.message,
+        stack: error.stack
+    });
+    
+    // Store error info
+    sessionStorage.setItem('submissionError', JSON.stringify({
+        message: error.message,
+        timestamp: new Date().toISOString(),
+        details: error.toString(),
+        stack: error.stack
+    }));
+    
+    // Reset button state
+    submitButton.disabled = false;
+    submitButton.innerHTML = originalText;
+    submitButton.classList.remove('loading');
+    
+    // Show error message
+    const successDiv = document.getElementById('successMessage');
+    const errorMessage = `❌ Submission failed: ${error.message}. Please try again or contact support.`;
+    
+    successDiv.innerHTML = errorMessage.replace(/\n/g, '<br>');
+    successDiv.style.display = 'block';
+    successDiv.style.background = '#fef2f2';
+    successDiv.style.color = '#dc2626';
+    successDiv.style.borderColor = '#fecaca';
+    
+    // Scroll to error message
+    successDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+// Attach form submission handler with error boundary
+document.getElementById('assessmentForm').addEventListener('submit', handleFormSubmission);
 
 // Smooth scrolling for anchor links
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
@@ -579,7 +685,11 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     });
 });
 
-// Phone number formatting
+/**
+ * Formats Canadian phone number with (xxx) xxx-xxxx pattern
+ * @param {string} value - Raw phone number input
+ * @returns {string} Formatted phone number string
+ */
 function formatPhoneNumber(value) {
     // Remove all non-digit characters
     const phoneNumber = value.replace(/\D/g, '');
