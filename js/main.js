@@ -1,5 +1,6 @@
 // SheetMonkey and EmailJS email submission
 const SHEET_MONKEY_URL = 'https://api.sheetmonkey.io/form/9MoRQbyaVfkrCsZGZW3Mt2';
+const FORMSPREE_URL = 'https://formspree.io/f/xeozkgvr';
 
 // Email template function
 function createEmailTemplate(formData) {
