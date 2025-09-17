@@ -1,10 +1,11 @@
-// SheetMonkey, Formspree, and EmailJS email submission
+// SheetMonkey and EmailJS email submission
 const SHEET_MONKEY_URL = 'https://api.sheetmonkey.io/form/9MoRQbyaVfkrCsZGZW3Mt2';
-const FORMSPREE_URL = 'https://formspree.io/f/xeozkgvr';
 
 // Email template function
 function createEmailTemplate(formData) {
-    const fullName = formData.get('name') || '';
+    const firstName = formData.get('first_name') || '';
+    const lastName = formData.get('last_name') || '';
+    const fullName = `${firstName} ${lastName}`.trim();
 
     return `
     <!DOCTYPE html>
@@ -322,6 +323,8 @@ async function submitToFormspree(formData) {
     }
 }
 
+
+
 async function submitDualData(formData) {
     let sheetMonkeySuccess = false;
     let formspreeSuccess = false;
@@ -394,13 +397,24 @@ document.getElementById('assessmentForm').addEventListener('submit', async funct
     
     // Validate required fields
     const requiredFields = [
-        {id: 'name', error: 'nameError', message: 'Name is required'},
+        {id: 'first-name', error: 'firstNameError', message: 'First name is required'},
+        {id: 'last-name', error: 'lastNameError', message: 'Last name is required'},
+        {id: 'date-of-birth', error: 'dateOfBirthError', message: 'Date of birth is required'},
         {id: 'email', error: 'emailError', message: 'Email is required'},
         {id: 'phone', error: 'phoneError', message: 'Phone number is required'},
         {id: 'province', error: 'provinceError', message: 'Province is required'},
-        {id: 'benefits', error: 'benefitsError', message: 'Benefits information is required'},
-        {id: 'member-id', error: 'memberIdError', message: 'Member ID is required'}
+        {id: 'benefits', error: 'benefitsError', message: 'Benefits information is required'}
     ];
+
+    // Add insurance fields to validation if benefits = "Yes"
+    const benefitsValue = document.getElementById('benefits')?.value;
+    if (benefitsValue === 'Yes') {
+        requiredFields.push(
+            {id: 'insurance', error: 'insuranceError', message: 'Insurance provider is required'},
+            {id: 'member-id', error: 'memberIdError', message: 'Member ID is required'},
+            {id: 'group-number', error: 'groupNumberError', message: 'Group number is required'}
+        );
+    }
     
     requiredFields.forEach(field => {
         const input = document.getElementById(field.id);
@@ -471,7 +485,7 @@ document.getElementById('assessmentForm').addEventListener('submit', async funct
         return false;
     }
     
-    // If validation passes, show loading state and submit to both services
+    // If validation passes, show loading state and submit to services
     const submitButton = document.getElementById('submitButton');
     const originalText = submitButton.innerHTML;
     submitButton.classList.add('loading');
@@ -479,7 +493,7 @@ document.getElementById('assessmentForm').addEventListener('submit', async funct
     submitButton.disabled = true;
     
     try {
-        // Submit to both SheetMonkey and Formspree
+        // Submit to both SheetMonkey and email services
         const formData = new FormData(this);
         console.log('📋 Form data collected, starting submission...');
         
@@ -495,8 +509,11 @@ document.getElementById('assessmentForm').addEventListener('submit', async funct
         
         // Show success message in the form
         const successDiv = document.getElementById('successMessage');
-        successDiv.textContent = successMessage;
+        successDiv.innerHTML = successMessage;
         successDiv.style.display = 'block';
+        successDiv.style.background = '#f0fdf4';
+        successDiv.style.color = '#15803d';
+        successDiv.style.borderColor = '#bbf7d0';
         
         // Store success info in sessionStorage
         sessionStorage.setItem('submissionSuccess', JSON.stringify({
@@ -532,16 +549,18 @@ document.getElementById('assessmentForm').addEventListener('submit', async funct
         submitButton.innerHTML = originalText;
         submitButton.classList.remove('loading');
         
-        // Show detailed error message
+        // Show error message
         const successDiv = document.getElementById('successMessage');
-        successDiv.textContent = `❌ Submission failed: ${error.message}. Please try again or contact support.`;
+        let errorMessage = `❌ Submission failed: ${error.message}. Please try again or contact support.`;
+        
+        successDiv.innerHTML = errorMessage.replace(/\n/g, '<br>');
         successDiv.style.display = 'block';
         successDiv.style.background = '#fef2f2';
         successDiv.style.color = '#dc2626';
         successDiv.style.borderColor = '#fecaca';
         
-        // Also alert the error so it doesn't disappear
-        alert(`Form submission failed: ${error.message}\n\nPlease check the console for more details and try again.`);
+        // Scroll to error message
+        successDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 });
 
@@ -665,3 +684,103 @@ function testEmailJSSend() {
 // Make functions globally available for debugging
 window.testEmailDebug = testEmailDebug;
 window.testEmailJSSend = testEmailJSSend;
+
+// Conditional insurance fields logic
+document.addEventListener('DOMContentLoaded', function() {
+    const benefitsSelect = document.getElementById('benefits');
+    const insuranceGroup = document.getElementById('insurance-group');
+    const memberIdGroup = document.getElementById('member-id-group');
+    const groupNumberGroup = document.getElementById('group-number-group');
+    const policyNumberGroup = document.getElementById('policy-number-group');
+    const insuranceSelect = document.getElementById('insurance');
+    const memberIdInput = document.getElementById('member-id');
+    const groupNumberInput = document.getElementById('group-number');
+
+    if (benefitsSelect) {
+        benefitsSelect.addEventListener('change', function() {
+            const showInsurance = this.value === 'Yes';
+            
+            if (showInsurance) {
+                // Show insurance fields with smooth CSS transition
+                if (insuranceGroup) {
+                    insuranceGroup.classList.add('show');
+                }
+                if (memberIdGroup) {
+                    memberIdGroup.classList.add('show');
+                }
+                if (groupNumberGroup) {
+                    groupNumberGroup.classList.add('show');
+                }
+                if (policyNumberGroup) {
+                    policyNumberGroup.classList.add('show');
+                }
+                
+                // Make required insurance fields required
+                if (insuranceSelect) insuranceSelect.required = true;
+                if (memberIdInput) memberIdInput.required = true;
+                if (groupNumberInput) groupNumberInput.required = true;
+                // Policy number is optional, so we don't make it required
+            } else {
+                // Hide insurance fields with smooth CSS transition
+                if (insuranceGroup) {
+                    insuranceGroup.classList.remove('show');
+                }
+                if (memberIdGroup) {
+                    memberIdGroup.classList.remove('show');
+                }
+                if (groupNumberGroup) {
+                    groupNumberGroup.classList.remove('show');
+                }
+                if (policyNumberGroup) {
+                    policyNumberGroup.classList.remove('show');
+                }
+                
+                // Remove required attribute and clear values
+                if (insuranceSelect) {
+                    insuranceSelect.required = false;
+                    insuranceSelect.value = '';
+                }
+                if (memberIdInput) {
+                    memberIdInput.required = false;
+                    memberIdInput.value = '';
+                }
+                if (groupNumberInput) {
+                    groupNumberInput.required = false;
+                    groupNumberInput.value = '';
+                }
+                // Clear policy number field
+                const policyNumberInput = document.getElementById('policy-number');
+                if (policyNumberInput) {
+                    policyNumberInput.value = '';
+                }
+            }
+        });
+    }
+
+    // Character count for description field
+    const descriptionField = document.getElementById('description');
+    if (descriptionField) {
+        descriptionField.addEventListener('input', function() {
+            const maxLength = 500;
+            const currentLength = this.value.length;
+            
+            if (currentLength > maxLength) {
+                this.value = this.value.substring(0, maxLength);
+            }
+            
+            const characterCount = this.parentNode.querySelector('.character-count small');
+            if (characterCount) {
+                const remaining = maxLength - this.value.length;
+                characterCount.textContent = `${remaining} characters remaining`;
+                
+                if (remaining < 50) {
+                    characterCount.style.color = '#ef4444';
+                } else if (remaining < 100) {
+                    characterCount.style.color = '#f59e0b';
+                } else {
+                    characterCount.style.color = '#6b7280';
+                }
+            }
+        });
+    }
+});
