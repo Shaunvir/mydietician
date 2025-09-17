@@ -26,7 +26,7 @@ async function sendEmailWithEmailJS(formData) {
     
     // Prepare template parameters (sending TO the patient using {{email}})
     const templateParams = {
-        name: formData.get('name') || '',
+        name: formData.get('first_name') || '',
         email: formData.get('email') || '',
         phone: formData.get('phone') || '',
         province: formData.get('province') || '',
@@ -35,10 +35,8 @@ async function sendEmailWithEmailJS(formData) {
         health_goals: Array.from(formData.getAll('health_goals[]')).join(', '),
         message: 'Thank you for submitting your My-Dietitian assessment',
         timestamp: new Date().toLocaleString(),
-        // Include the full HTML template content for the patient email
-        html_body: await loadEmailTemplate(),
         // Additional template variables
-        patient_name: formData.get('name') || '',
+        patient_name: formData.get('first_name') || '',
         patient_email: formData.get('email') || '',
         dietitian_name: '[Dietitian Name]', // This can be customized later
         your_name: 'My-Dietitian Team' // This can be customized later
@@ -61,85 +59,6 @@ async function sendEmailWithEmailJS(formData) {
     }
 }
 
-// Load and customize email template content for the patient
-async function loadEmailTemplate() {
-    try {
-        // For local development, we need to handle CORS restrictions
-        // Try to load the template, but expect it might fail locally
-        console.log('📧 Attempting to load email template...');
-        
-        const response = await fetch('./email_templates/book_appointment.html', {
-            method: 'GET',
-            mode: 'cors',
-            cache: 'no-cache'
-        });
-        
-        if (response.ok) {
-            let template = await response.text();
-            
-            // Replace placeholder text with EmailJS template variables
-            template = template.replace(/\[Patient Name\]/g, '{{name}}');
-            template = template.replace(/\[Dietitian Name\]/g, '{{dietitian_name}}');
-            template = template.replace(/\[Your Name\]/g, '{{your_name}}');
-            
-            console.log('✅ Email template loaded successfully');
-            return template;
-        } else {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-    } catch (error) {
-        console.warn('❌ Could not load external template:', error.message);
-        console.log('📧 Using fallback template (normal for local development)');
-        return createFallbackTemplate();
-    }
-}
-
-// Fallback template if the HTML file can't be loaded
-function createFallbackTemplate() {
-    return `
-    <div style="max-width: 600px; margin: 0 auto; font-family: Arial, sans-serif; background-color: #ffffff; border: 1px solid #e8eaed; border-radius: 12px;">
-        <div style="padding: 24px 32px; border-bottom: 1px solid #f0f2f5; text-align: center;">
-            <div style="font-size: 24px; font-weight: 700; color: #1a1a1a;">🥗 My-Dietitian</div>
-        </div>
-        
-        <div style="padding: 32px;">
-            <div style="font-size: 16px; font-weight: 500; color: #1a1a1a; margin-bottom: 24px;">Hi {{name}},</div>
-            
-            <div style="font-size: 16px; line-height: 1.6; color: #374151; margin-bottom: 20px;">
-                <strong style="color: #22c55e; font-weight: 600;">Great news!</strong> We've received your My-Dietitian assessment and our team will review your information.
-            </div>
-            
-            <div style="background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%); border: 1px solid #bbf7d0; border-radius: 8px; padding: 20px; margin: 24px 0; text-align: center;">
-                <div style="font-size: 24px; margin-bottom: 8px;">✅</div>
-                <p style="font-size: 15px; color: #166534; margin: 0; font-weight: 500;">Assessment Received Successfully</p>
-            </div>
-            
-            <div style="background-color: #f8fafc; border-radius: 8px; padding: 24px; margin: 24px 0; text-align: center; border: 1px solid #e2e8f0;">
-                <div style="font-size: 18px; font-weight: 600; color: #1a1a1a; margin-bottom: 12px;">What happens next?</div>
-                <div style="font-size: 14px; color: #6b7280; margin-bottom: 20px;">We'll verify your insurance benefits and match you with a qualified dietitian</div>
-                <a href="https://calendly.com/jstanislvskaia/" style="display: inline-block; background-color: #22c55e; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">Book Your Appointment</a>
-            </div>
-            
-            <div style="font-size: 16px; color: #374151; margin-top: 24px;">
-                Thank you for choosing My-Dietitian for your nutrition needs!
-            </div>
-            
-            <div style="margin-top: 32px; padding-top: 20px; border-top: 1px solid #f0f2f5;">
-                <div style="font-weight: 500; color: #1a1a1a; font-size: 16px; margin-bottom: 4px;">Best regards,</div>
-                <div style="font-weight: 500; color: #1a1a1a; font-size: 16px; margin-bottom: 4px;">{{your_name}}</div>
-                <div style="color: #6b7280; font-size: 14px;">My-Dietitian</div>
-            </div>
-        </div>
-        
-        <div style="background-color: #f8fafc; padding: 20px 32px; text-align: center; border-top: 1px solid #f0f2f5;">
-            <p style="font-size: 12px; color: #9ca3af; margin: 0;">
-                © 2025 My-Dietitian. All rights reserved.<br>
-                Connecting you with registered dietitians covered by your benefits.
-            </p>
-        </div>
-    </div>
-    `;
-}
 
 // Debug function to test email configuration
 function debugEmailConfig() {
