@@ -361,6 +361,15 @@
     <!-- EmailJS for custom email templates -->
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
     <script src="js/email-config.js"></script>
+    <script>
+        // Initialize EmailJS as soon as possible
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof emailjs !== 'undefined' && typeof EMAILJS_PUBLIC_KEY !== 'undefined') {
+                emailjs.init(EMAILJS_PUBLIC_KEY);
+                console.log('✅ EmailJS initialized on DOMContentLoaded');
+            }
+        });
+    </script>
     <script src="js/emailjs-send.js"></script>
     <script src="js/main.js"></script>
 </body>
