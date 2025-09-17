@@ -1,5 +1,10 @@
 // Email configuration for EmailJS
-// IMPORTANT: Replace the placeholders with your actual EmailJS values
+// SECURITY WARNING: These are public API keys for a static website hosted on GoDaddy.
+// EmailJS public keys are designed to be exposed in client-side code, but you should:
+// 1. Configure domain restrictions in your EmailJS dashboard
+// 2. Set up rate limiting and usage monitoring
+// 3. Regularly rotate these keys if needed
+// 4. Monitor usage in your EmailJS dashboard
 
 // EmailJS Configuration
 const EMAILJS_PUBLIC_KEY = '6fXer2OnVAybIBX6Y';
@@ -63,14 +68,6 @@ async function sendEmailWithEmailJS(formData) {
 // Debug function to test email configuration
 function debugEmailConfig() {
     console.log('🔧 Email Configuration Debug:');
-    
-    // Check EmailJS configuration
-    console.log('EmailJS Config:', {
-        HasPublicKey: !!EMAILJS_PUBLIC_KEY && EMAILJS_PUBLIC_KEY !== '<YOUR_EMAILJS_PUBLIC_KEY>',
-        HasServiceId: !!EMAILJS_SERVICE_ID && EMAILJS_SERVICE_ID !== '<YOUR_EMAILJS_SERVICE_ID>',
-        HasTemplateId: !!EMAILJS_TEMPLATE_ID && EMAILJS_TEMPLATE_ID !== '<YOUR_EMAILJS_TEMPLATE_ID>',
-        EmailJSLoaded: typeof emailjs !== 'undefined'
-    });
     
     // Check EmailJS configuration
     console.log('EmailJS Config:', {
