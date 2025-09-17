@@ -30,9 +30,24 @@ async function sendEmailWithEmailJS(formData) {
     }
     
     // Prepare template parameters (sending TO the patient using {{email}})
+    const firstName = formData.get('first_name') || '';
+    const email = formData.get('email') || '';
+    
     const templateParams = {
-        name: formData.get('first_name') || '',
-        email: formData.get('email') || '',
+        // Multiple name field variations to ensure compatibility
+        name: firstName,
+        first_name: firstName,
+        patient_name: firstName,
+        to_name: firstName,
+        user_name: firstName,
+        
+        // Multiple email field variations
+        email: email,
+        to_email: email,
+        patient_email: email,
+        user_email: email,
+        
+        // Other form fields
         phone: formData.get('phone') || '',
         province: formData.get('province') || '',
         benefits: formData.get('benefits') || '',
@@ -40,11 +55,11 @@ async function sendEmailWithEmailJS(formData) {
         health_goals: Array.from(formData.getAll('health_goals[]')).join(', '),
         message: 'Thank you for submitting your My-Dietitian assessment',
         timestamp: new Date().toLocaleString(),
-        // Additional template variables
-        patient_name: formData.get('first_name') || '',
-        patient_email: formData.get('email') || '',
+        
+        // Sender information
         dietitian_name: '[Dietitian Name]', // This can be customized later
-        your_name: 'My-Dietitian Team' // This can be customized later
+        your_name: 'My-Dietitian Team', // This can be customized later
+        from_name: 'My-Dietitian Team'
     };
     
     console.log('📤 Sending email with template params:', templateParams);
@@ -70,12 +85,16 @@ function debugEmailConfig() {
     console.log('🔧 Email Configuration Debug:');
     
     // Check EmailJS configuration
-    console.log('EmailJS Config:', {
+    const config = {
         HasPublicKey: !!EMAILJS_PUBLIC_KEY && EMAILJS_PUBLIC_KEY !== '<YOUR_EMAILJS_PUBLIC_KEY>',
         HasServiceId: !!EMAILJS_SERVICE_ID && EMAILJS_SERVICE_ID !== '<YOUR_EMAILJS_SERVICE_ID>',
         HasTemplateId: !!EMAILJS_TEMPLATE_ID && EMAILJS_TEMPLATE_ID !== '<YOUR_EMAILJS_TEMPLATE_ID>',
-        EmailJSLoaded: typeof emailjs !== 'undefined'
-    });
+        EmailJSLoaded: typeof emailjs !== 'undefined',
+        PublicKeyValue: EMAILJS_PUBLIC_KEY ? EMAILJS_PUBLIC_KEY.substring(0, 5) + '...' : 'NOT SET',
+        ServiceIdValue: EMAILJS_SERVICE_ID ? EMAILJS_SERVICE_ID.substring(0, 8) + '...' : 'NOT SET'
+    };
+    
+    console.log('EmailJS Config:', config);
     
     // Test basic connectivity
     console.log('🌐 Testing CORS and connectivity...');
@@ -88,16 +107,32 @@ function debugEmailConfig() {
         console.warn('⚠️ Basic connectivity test failed:', e.message);
     }
     
-    return true;
+    return config;
 }
 
-// Auto-run debug on load
+// Initialize EmailJS with public key
+function initializeEmailJS() {
+    if (typeof emailjs !== 'undefined') {
+        emailjs.init(EMAILJS_PUBLIC_KEY);
+        console.log('✅ EmailJS initialized with public key');
+        return true;
+    } else {
+        console.error('❌ EmailJS library not loaded');
+        return false;
+    }
+}
+
+// Auto-run debug and initialize on load
 window.addEventListener('load', () => {
-    setTimeout(debugEmailConfig, 1000);
+    setTimeout(() => {
+        initializeEmailJS();
+        debugEmailConfig();
+    }, 1000);
 });
 
 // Make functions globally available
 window.sendEmailWithEmailJS = sendEmailWithEmailJS;
+window.initializeEmailJS = initializeEmailJS;
 
 // Instructions:
 /*
