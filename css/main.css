@@ -297,9 +297,9 @@ body {
     border: 1px solid rgba(0, 0, 0, 0.06);
 }
 
-/* Google Form Container - maintains same styling as original form */
+/* Google Form Container - nice styling like before */
 .google-form-container {
-    max-width: 600px;
+    max-width: 660px;
     margin: 0 auto;
     background: white;
     padding: 24px;
@@ -309,12 +309,29 @@ body {
     overflow: hidden;
 }
 
-#ff-compose {
+.google-form-container iframe {
     width: 100%;
-    min-height: 600px;
+    max-width: 640px;
+    border: none;
+    border-radius: 8px;
+    display: block;
+    margin: 0 auto;
+}
+
+/* Responsive adjustments for Google Form */
+@media (max-width: 768px) {
+    .google-form-container {
+        padding: 16px;
+        margin: 0 20px;
+    }
+    
+    .google-form-container iframe {
+        height: 1000px;
+    }
 }
 
 /* Change purple buttons to green */
+/*
 #ff-compose button {
     background: #16a34a !important;
     background-color: #16a34a !important;
@@ -326,8 +343,10 @@ body {
     background-color: #15803d !important;
     color: white !important;
 }
+*/
 
 /* Hide Formfacade watermark */
+/*
 #ff-compose .ff-footer,
 #ff-compose .formfacade-footer,
 #ff-compose .powered-by,
@@ -348,8 +367,10 @@ body {
     border-radius: 16px;
     background: transparent;
 }
+*/
 
 /* Responsive adjustments for Google Form */
+/*
 @media (max-width: 768px) {
     .google-form-container {
         padding: 16px;
@@ -364,6 +385,7 @@ body {
         min-height: 500px;
     }
 }
+*/
 
 .form-group {
     margin-bottom: 24px;
@@ -511,6 +533,33 @@ body {
     color: #dc2626;
     font-size: 14px;
     margin-top: 4px;
+}
+
+.character-count {
+    text-align: right;
+    margin-top: 4px;
+}
+
+.character-count small {
+    color: #6b7280;
+    font-size: 12px;
+}
+
+/* Insurance details conditional visibility */
+.insurance-details-group {
+    overflow: hidden;
+    transition: all 0.3s ease-in-out;
+    opacity: 0;
+    max-height: 0;
+    margin-bottom: 0;
+    transform: translateY(-10px);
+}
+
+.insurance-details-group.show {
+    opacity: 1;
+    max-height: 200px;
+    margin-bottom: 24px;
+    transform: translateY(0);
 }
 
 .submit-button {
